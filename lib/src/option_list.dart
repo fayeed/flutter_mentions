@@ -2,13 +2,10 @@ part of flutter_mentions;
 
 class OptionList extends StatelessWidget {
   OptionList({
-    this.listKey,
     this.data,
     this.onTap,
     this.suggestionListHeight,
   });
-
-  final GlobalKey listKey;
 
   final List<MentionItem> data;
 
@@ -19,7 +16,6 @@ class OptionList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      key: listKey,
       color: Colors.green,
       constraints: BoxConstraints(maxHeight: this.suggestionListHeight),
       width: MediaQuery.of(context).size.width,

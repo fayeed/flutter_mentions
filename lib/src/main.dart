@@ -5,7 +5,7 @@ enum SuggestionPosition { Top, Bottom }
 class FlutterMentions extends StatefulWidget {
   FlutterMentions({
     this.mentions,
-    this.suggestionPosition = SuggestionPosition.Top,
+    this.suggestionPosition = SuggestionPosition.Bottom,
     this.suggestionListHeight = 300.0,
   });
 
@@ -20,9 +20,7 @@ class FlutterMentions extends StatefulWidget {
 class _FlutterMentionsState extends State<FlutterMentions> {
   AnnotationEditingController _controller;
   final LayerLink layerLink = LayerLink();
-  OverlayEntry overlayEntry;
-  GlobalKey key = GlobalKey();
-  GlobalKey listKey = GlobalKey();
+  bool showSuggestions = false;
 
   @override
   void initState() {
@@ -38,90 +36,50 @@ class _FlutterMentionsState extends State<FlutterMentions> {
     _controller.addListener(() {
       final cursorPos = _controller.selection.baseOffset - 1;
       if (cursorPos > 0) {
-        print(_controller.value.text[cursorPos]);
-
-        if (_controller.value.text[cursorPos] == widget.mentions.trigger) {
-          showOverlay();
-        } else {
-          hideOverlay();
-        }
+        setState(() {
+          showSuggestions =
+              _controller.value.text[cursorPos] == widget.mentions.trigger;
+        });
       }
     });
 
     super.initState();
   }
 
-  void showOverlay() {
-    RenderBox renderBox = key.currentContext.findRenderObject();
-
-    final size = renderBox.size;
-
-    final list = OptionList(
-      listKey: listKey,
-      suggestionListHeight: widget.suggestionListHeight,
-      data: widget.mentions.data,
-      onTap: (value) {
-        _controller.text += value;
-
-        if (overlayEntry != null) {
-          overlayEntry.remove();
-          overlayEntry = null;
-        }
-      },
-    );
-
-    RenderBox listRenderBox = listKey.currentContext?.findRenderObject();
-
-    final suggestionListHeight =
-        listRenderBox != null ? listRenderBox.size.height : 0;
-
-    // print(list.listKey.currentContext.findRenderObject());
-
-    if (overlayEntry == null) {
-      overlayEntry = OverlayEntry(
-        builder: (BuildContext context) {
-          return Positioned(
-            bottom: 0.0,
-            left: 0.0,
-            child: CompositedTransformFollower(
-              showWhenUnlinked: false,
-              link: layerLink,
-              offset: Offset(
-                0,
-                widget.suggestionPosition == SuggestionPosition.Top
-                    ? -(size.height + ((size.height / 1.2) + size.height))
-                    : (size.height + 5.0),
-              ),
-              child: list,
-            ),
-          );
-        },
-      );
-
-      Overlay.of(context).insert(overlayEntry);
-    }
-  }
-
-  void hideOverlay() {
-    if (overlayEntry != null) {
-      overlayEntry.remove();
-      overlayEntry = null;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
-    return Container(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          CompositedTransformTarget(
-              link: layerLink,
+    return Portal(
+      child: Container(
+        child: Column(
+          children: [
+            PortalEntry(
+              portalAnchor:
+                  widget.suggestionPosition == SuggestionPosition.Bottom
+                      ? Alignment.topCenter
+                      : Alignment.bottomCenter,
+              childAnchor:
+                  widget.suggestionPosition == SuggestionPosition.Bottom
+                      ? Alignment.bottomCenter
+                      : Alignment.topCenter,
+              portal: showSuggestions
+                  ? OptionList(
+                      suggestionListHeight: widget.suggestionListHeight,
+                      data: widget.mentions.data,
+                      onTap: (value) {
+                        _controller.text += value;
+
+                        setState(() {
+                          showSuggestions = false;
+                        });
+                      },
+                    )
+                  : Container(),
               child: TextField(
-                key: key,
                 controller: _controller,
-              ))
-        ],
+              ),
+            )
+          ],
+        ),
       ),
     );
   }
