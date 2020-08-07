@@ -1,7 +1,8 @@
 library flutter_mentions;
 
-/// A Calculator.
-class Calculator {
-  /// Returns [value] plus 1.
-  int addOne(int value) => value + 1;
-}
+import 'package:flutter/material.dart';
+
+part 'src/annotation_editing_controller.dart';
+part 'src/main.dart';
+part 'src/mentions.dart';
+part 'src/option_list.dart';
