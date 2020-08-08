@@ -10,16 +10,34 @@ class LengthMap {
   int end;
 }
 
+class Annotation {
+  Annotation({
+    this.style,
+    this.id,
+    this.display,
+    this.trigger,
+    this.disableMarkup,
+  });
+
+  TextStyle style;
+  String id;
+  String display;
+  String trigger;
+  bool disableMarkup;
+}
+
 class FlutterMentions extends StatefulWidget {
   FlutterMentions({
     this.mentions,
     this.suggestionPosition = SuggestionPosition.Bottom,
     this.suggestionListHeight = 300.0,
+    this.onMarkupChanged,
   });
 
   final List<Mention> mentions;
   final SuggestionPosition suggestionPosition;
   final double suggestionListHeight;
+  final Function(String) onMarkupChanged;
 
   @override
   _FlutterMentionsState createState() => _FlutterMentionsState();
@@ -34,19 +52,38 @@ class _FlutterMentionsState extends State<FlutterMentions> {
 
   @override
   void initState() {
-    final Map<String, TextStyle> data = Map<String, TextStyle>();
+    final Map<String, Annotation> data = Map<String, Annotation>();
 
     widget.mentions.forEach((element) {
       if (element.matchAll)
-        data["${element.trigger}([A-Za-z0-9])*"] = element.style;
+        data["${element.trigger}([A-Za-z0-9])*"] = Annotation(
+          style: element.style,
+          id: null,
+          display: null,
+          trigger: element.trigger,
+          disableMarkup: element.disableMarkup,
+        );
 
       element.data?.forEach(
-        (e) =>
-            data["${element.trigger}${e['id']}"] = e["style"] ?? element.style,
+        (e) => data["${element.trigger}${e['display']}"] = e["style"] != null
+            ? Annotation(
+                style: e["style"],
+                id: e["id"],
+                display: e["display"],
+                trigger: element.trigger,
+                disableMarkup: element.disableMarkup,
+              )
+            : Annotation(
+                style: element.style,
+                id: e["id"],
+                display: e["display"],
+                trigger: element.trigger,
+                disableMarkup: element.disableMarkup,
+              ),
       );
     });
 
-    _controller = AnnotationEditingController(data, null);
+    _controller = AnnotationEditingController(data);
 
     _controller.addListener(() {
       final cursorPos = _controller.selection.baseOffset - 1;
@@ -99,7 +136,7 @@ class _FlutterMentionsState extends State<FlutterMentions> {
                 suggestionListHeight: widget.suggestionListHeight,
                 suggestionBuilder: list.suggestionBuilder,
                 data: list.data.where((element) {
-                  final ele = element["id"].toLowerCase();
+                  final ele = element["display"].toLowerCase();
                   final str = selectedMention.str
                       .toLowerCase()
                       .replaceAll(RegExp(pattern), "");
@@ -123,6 +160,11 @@ class _FlutterMentionsState extends State<FlutterMentions> {
           maxLines: 5,
           minLines: 1,
           controller: _controller,
+          onChanged: (text) {
+            print("text: $text");
+            if (widget.onMarkupChanged != null)
+              widget.onMarkupChanged(_controller.markupText);
+          },
         ),
       ),
     );

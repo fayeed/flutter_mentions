@@ -30,7 +30,7 @@ class OptionList extends StatelessWidget {
         itemBuilder: (context, index) {
           return GestureDetector(
             onTap: () {
-              onTap(data[index]["id"]);
+              onTap(data[index]["display"]);
             },
             child: suggestionBuilder != null
                 ? suggestionBuilder(data[index])

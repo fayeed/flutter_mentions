@@ -1,12 +1,36 @@
 part of flutter_mentions;
 
 class AnnotationEditingController extends TextEditingController {
-  final Map<String, TextStyle> mapping;
+  final Map<String, Annotation> mapping;
   final String pattern;
-  final TextStyle style;
 
-  AnnotationEditingController(this.mapping, this.style)
+  AnnotationEditingController(this.mapping)
       : pattern = "(${mapping.keys.map((key) => key).join('|')})";
+
+  get markupText {
+    final someVal = text.splitMapJoin(
+      RegExp("$pattern"),
+      onMatch: (Match match) {
+        final mention = mapping[match[0]] != null
+            ? mapping[match[0]]
+            : mapping[mapping.keys.firstWhere((element) {
+                final reg = new RegExp(element);
+
+                return reg.hasMatch(match[0]);
+              })];
+
+        if (!mention.disableMarkup)
+          return "${mention.trigger}[__${mention.id}__](__${mention.display}__)";
+        else
+          return match[0];
+      },
+      onNonMatch: (String text) {
+        return text;
+      },
+    );
+
+    return someVal;
+  }
 
   @override
   TextSpan buildTextSpan({TextStyle style, bool withComposing}) {
@@ -15,7 +39,7 @@ class AnnotationEditingController extends TextEditingController {
     text.splitMapJoin(
       RegExp("$pattern"),
       onMatch: (Match match) {
-        final style = mapping[match[0]] != null
+        final mention = mapping[match[0]] != null
             ? mapping[match[0]]
             : mapping[mapping.keys.firstWhere((element) {
                 final reg = new RegExp(element);
@@ -26,7 +50,7 @@ class AnnotationEditingController extends TextEditingController {
         children.add(
           TextSpan(
             text: match[0],
-            style: style.merge(style),
+            style: style.merge(mention.style),
           ),
         );
         return "";
