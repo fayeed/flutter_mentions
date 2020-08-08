@@ -42,7 +42,7 @@ class _MyHomePageState extends State<MyHomePage> {
         mainAxisAlignment: MainAxisAlignment.end,
         children: <Widget>[
           RaisedButton(
-            child: Text("Get Text"),
+            child: Text('Get Text'),
             onPressed: () {
               print(key.currentState.controller.markupText);
             },
@@ -55,39 +55,39 @@ class _MyHomePageState extends State<MyHomePage> {
               minLines: 1,
               mentions: [
                 Mention(
-                    trigger: "@",
+                    trigger: '@',
                     style: TextStyle(
                       color: Colors.amber,
                     ),
                     data: [
                       {
-                        "id": "61as61fsa",
-                        "display": "fayeedP",
-                        "full_name": "Fayeed Pawaskar",
-                        "photo":
-                            "https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+                        'id': '61as61fsa',
+                        'display': 'fayeedP',
+                        'full_name': 'Fayeed Pawaskar',
+                        'photo':
+                            'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940'
                       },
                       {
-                        "id": "61asasgasgsag6a",
-                        "display": "khaled",
-                        "full_name": "DJ Khaled",
-                        "style": TextStyle(color: Colors.purple),
-                        "photo":
-                            "https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+                        'id': '61asasgasgsag6a',
+                        'display': 'khaled',
+                        'full_name': 'DJ Khaled',
+                        'style': TextStyle(color: Colors.purple),
+                        'photo':
+                            'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940'
                       },
                       {
-                        "id": "asfgasga41",
-                        "display": "markT",
-                        "full_name": "Mark Twain",
-                        "photo":
-                            "https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+                        'id': 'asfgasga41',
+                        'display': 'markT',
+                        'full_name': 'Mark Twain',
+                        'photo':
+                            'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940'
                       },
                       {
-                        "id": "asfsaf451a",
-                        "display": "JhonL",
-                        "full_name": "Jhon Legend",
-                        "photo":
-                            "https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+                        'id': 'asfsaf451a',
+                        'display': 'JhonL',
+                        'full_name': 'Jhon Legend',
+                        'photo':
+                            'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940'
                       },
                     ],
                     matchAll: false,
@@ -98,7 +98,7 @@ class _MyHomePageState extends State<MyHomePage> {
                           children: <Widget>[
                             CircleAvatar(
                               backgroundImage: NetworkImage(
-                                data["photo"],
+                                data['photo'],
                               ),
                             ),
                             SizedBox(
@@ -106,8 +106,8 @@ class _MyHomePageState extends State<MyHomePage> {
                             ),
                             Column(
                               children: <Widget>[
-                                Text(data["full_name"]),
-                                Text("@${data["display"]}"),
+                                Text(data['full_name']),
+                                Text('@${data['display']}'),
                               ],
                             )
                           ],
@@ -115,14 +115,14 @@ class _MyHomePageState extends State<MyHomePage> {
                       );
                     }),
                 Mention(
-                  trigger: "#",
+                  trigger: '#',
                   disableMarkup: true,
                   style: TextStyle(
                     color: Colors.blue,
                   ),
                   data: [
-                    {"id": "reactjs", "display": "reactjs"},
-                    {"id": "javascript", "display": "javascript"},
+                    {'id': 'reactjs', 'display': 'reactjs'},
+                    {'id': 'javascript', 'display': 'javascript'},
                   ],
                   matchAll: true,
                 )

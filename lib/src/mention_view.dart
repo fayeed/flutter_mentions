@@ -225,37 +225,38 @@ class FlutterMentionsState extends State<FlutterMentions> {
   AnnotationEditingController controller;
   bool _showSuggestions = false;
   LengthMap _selectedMention;
-  String _pattern = "";
+  String _pattern = '';
 
   @override
   void initState() {
-    final Map<String, Annotation> data = Map<String, Annotation>();
+    final data = <String, Annotation>{};
 
     // Loop over all the mention items and generate a suggestions matching list
     widget.mentions.forEach((element) {
       // if matchAll is set to true add a general regex patteren to match with
-      if (element.matchAll)
-        data["${element.trigger}([A-Za-z0-9])*"] = Annotation(
+      if (element.matchAll) {
+        data['${element.trigger}([A-Za-z0-9])*'] = Annotation(
           style: element.style,
           id: null,
           display: null,
           trigger: element.trigger,
           disableMarkup: element.disableMarkup,
         );
+      }
 
       element.data?.forEach(
-        (e) => data["${element.trigger}${e['display']}"] = e["style"] != null
+        (e) => data["${element.trigger}${e['display']}"] = e['style'] != null
             ? Annotation(
-                style: e["style"],
-                id: e["id"],
-                display: e["display"],
+                style: e['style'],
+                id: e['id'],
+                display: e['display'],
                 trigger: element.trigger,
                 disableMarkup: element.disableMarkup,
               )
             : Annotation(
                 style: element.style,
-                id: e["id"],
-                display: e["display"],
+                id: e['id'],
+                display: e['display'],
                 trigger: element.trigger,
                 disableMarkup: element.disableMarkup,
               ),
@@ -269,12 +270,12 @@ class FlutterMentionsState extends State<FlutterMentions> {
       final cursorPos = controller.selection.baseOffset;
 
       if (cursorPos - 1 > 0) {
-        int _pos = 0;
+        var _pos = 0;
 
-        final lengthMap = List<LengthMap>();
+        final lengthMap = <LengthMap>[];
 
         // split on each word and generate a list with start & end position of each word.
-        controller.value.text.split(RegExp(r"(\s)")).forEach((element) {
+        controller.value.text.split(RegExp(r'(\s)')).forEach((element) {
           lengthMap.add(
               LengthMap(str: element, start: _pos, end: _pos + element.length));
 
@@ -282,7 +283,7 @@ class FlutterMentionsState extends State<FlutterMentions> {
         });
 
         final val = lengthMap.indexWhere((element) {
-          _pattern = widget.mentions.map((e) => e.trigger).join("|");
+          _pattern = widget.mentions.map((e) => e.trigger).join('|');
 
           return element.end == cursorPos &&
               element.str.toLowerCase().contains(RegExp(_pattern));
@@ -320,10 +321,10 @@ class FlutterMentionsState extends State<FlutterMentions> {
                 suggestionBuilder: list.suggestionBuilder,
                 suggestionListDecoration: widget.suggestionListDecoration,
                 data: list.data.where((element) {
-                  final ele = element["display"].toLowerCase();
+                  final ele = element['display'].toLowerCase();
                   final str = _selectedMention.str
                       .toLowerCase()
-                      .replaceAll(RegExp(_pattern), "");
+                      .replaceAll(RegExp(_pattern), '');
 
                   return ele == str ? false : ele.contains(str);
                 }).toList(),
@@ -379,8 +380,9 @@ class FlutterMentionsState extends State<FlutterMentions> {
           controller: controller,
           onChanged: (text) {
             if (widget.onChanged != null) widget.onChanged(text);
-            if (widget.onMarkupChanged != null)
+            if (widget.onMarkupChanged != null) {
               widget.onMarkupChanged(controller.markupText);
+            }
           },
         ),
       ),

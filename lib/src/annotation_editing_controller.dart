@@ -11,23 +11,23 @@ class AnnotationEditingController extends TextEditingController {
       : _pattern = "(${_mapping.keys.map((key) => key).join('|')})";
 
   /// Can be used to get the markup from the controller directly.
-  get markupText {
+  String get markupText {
     final someVal = text.splitMapJoin(
-      RegExp("$_pattern"),
+      RegExp('$_pattern'),
       onMatch: (Match match) {
-        final mention = _mapping[match[0]] != null
-            ? _mapping[match[0]]
-            : _mapping[_mapping.keys.firstWhere((element) {
-                final reg = new RegExp(element);
+        final mention = _mapping[match[0]] ??
+            _mapping[_mapping.keys.firstWhere((element) {
+              final reg = RegExp(element);
 
-                return reg.hasMatch(match[0]);
-              })];
+              return reg.hasMatch(match[0]);
+            })];
 
         // Default markup format for mentions
-        if (!mention.disableMarkup)
-          return "${mention.trigger}[__${mention.id}__](__${mention.display}__)";
-        else
+        if (!mention.disableMarkup) {
+          return '${mention.trigger}[__${mention.id}__](__${mention.display}__)';
+        } else {
           return match[0];
+        }
       },
       onNonMatch: (String text) {
         return text;
@@ -39,18 +39,17 @@ class AnnotationEditingController extends TextEditingController {
 
   @override
   TextSpan buildTextSpan({TextStyle style, bool withComposing}) {
-    List<InlineSpan> children = [];
+    var children = <InlineSpan>[];
 
     text.splitMapJoin(
-      RegExp("$_pattern"),
+      RegExp('$_pattern'),
       onMatch: (Match match) {
-        final mention = _mapping[match[0]] != null
-            ? _mapping[match[0]]
-            : _mapping[_mapping.keys.firstWhere((element) {
-                final reg = new RegExp(element);
+        final mention = _mapping[match[0]] ??
+            _mapping[_mapping.keys.firstWhere((element) {
+              final reg = RegExp(element);
 
-                return reg.hasMatch(match[0]);
-              })];
+              return reg.hasMatch(match[0]);
+            })];
 
         children.add(
           TextSpan(
@@ -58,11 +57,11 @@ class AnnotationEditingController extends TextEditingController {
             style: style.merge(mention.style),
           ),
         );
-        return "";
+        return '';
       },
       onNonMatch: (String text) {
         children.add(TextSpan(text: text, style: style));
-        return "";
+        return '';
       },
     );
     return TextSpan(style: style, children: children);

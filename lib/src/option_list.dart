@@ -25,7 +25,7 @@ class OptionList extends StatelessWidget {
       decoration:
           suggestionListDecoration ?? BoxDecoration(color: Colors.white),
       constraints: BoxConstraints(
-        maxHeight: this.suggestionListHeight,
+        maxHeight: suggestionListHeight,
       ),
       width: MediaQuery.of(context).size.width,
       child: ListView.builder(
@@ -41,7 +41,7 @@ class OptionList extends StatelessWidget {
                 : Container(
                     padding: EdgeInsets.all(20.0),
                     child: Text(
-                      data[index]["display"],
+                      data[index]['display'],
                       style: TextStyle(fontSize: 12),
                     ),
                   ),
