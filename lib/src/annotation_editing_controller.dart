@@ -2,25 +2,35 @@ part of flutter_mentions;
 
 class AnnotationEditingController extends TextEditingController {
   final Map<String, TextStyle> mapping;
-  final Pattern pattern;
-  final bool matchAll;
+  final String pattern;
   final TextStyle style;
 
-  AnnotationEditingController(this.mapping, this.matchAll, this.style)
-      : pattern =
-            RegExp(mapping.keys.map((key) => RegExp.escape(key)).join('|'));
+  AnnotationEditingController(this.mapping, this.style)
+      : pattern = "(${mapping.keys.map((key) => key).join('|')})";
 
   @override
   TextSpan buildTextSpan({TextStyle style, bool withComposing}) {
     List<InlineSpan> children = [];
-    // splitMapJoin is a bit tricky here but i found it very handy for populating children list
+
     text.splitMapJoin(
-      matchAll ? RegExp(r"@([A-Za-z0-9])*") : pattern,
+      RegExp("$pattern"),
       onMatch: (Match match) {
-        print(match[0]);
-        children.add(TextSpan(
+        final style = mapping[match[0]] != null
+            ? mapping[match[0]]
+            : mapping[mapping.keys.firstWhere((element) {
+                final reg = new RegExp(element);
+
+                print("regex matches: ${match[0]} ${reg.hasMatch(match[0])}");
+
+                return reg.hasMatch(match[0]);
+              })];
+
+        children.add(
+          TextSpan(
             text: match[0],
-            style: matchAll ? this.style : style.merge(mapping[match[0]])));
+            style: style.merge(style),
+          ),
+        );
         return "";
       },
       onNonMatch: (String text) {

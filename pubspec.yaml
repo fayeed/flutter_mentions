@@ -2,7 +2,7 @@ name: flutter_mentions
 description: A new Flutter package project.
 version: 0.0.1
 author:
-homepage:
+homepage: https://github.com
 
 environment:
   sdk: ">=2.7.0 <3.0.0"
@@ -10,7 +10,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  flutter_portal: ^0.0.1
+  flutter_portal: ^0.1.0
 
 dev_dependencies:
   flutter_test:
