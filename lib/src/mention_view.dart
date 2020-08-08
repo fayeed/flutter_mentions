@@ -274,7 +274,7 @@ class FlutterMentionsState extends State<FlutterMentions> {
         final lengthMap = List<LengthMap>();
 
         // split on each word and generate a list with start & end position of each word.
-        controller.value.text.split(" ").forEach((element) {
+        controller.value.text.split(RegExp(r"(\s)")).forEach((element) {
           lengthMap.add(
               LengthMap(str: element, start: _pos, end: _pos + element.length));
 
@@ -335,7 +335,7 @@ class FlutterMentionsState extends State<FlutterMentions> {
                     "${list.trigger}${value['display']}${widget.appendSpaceOnAdd ? ' ' : ''}",
                   );
 
-                  widget.onMentionAdd(value);
+                  if (widget.onMentionAdd != null) widget.onMentionAdd(value);
 
                   setState(() {
                     _showSuggestions = false;
