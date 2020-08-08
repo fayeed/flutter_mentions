@@ -1,24 +1,29 @@
 part of flutter_mentions;
 
+/// A custom implementation of [TextEditingController] to support @ mention or other
+/// trigger based mentions.
 class AnnotationEditingController extends TextEditingController {
-  final Map<String, Annotation> mapping;
-  final String pattern;
+  final Map<String, Annotation> _mapping;
+  final String _pattern;
 
-  AnnotationEditingController(this.mapping)
-      : pattern = "(${mapping.keys.map((key) => key).join('|')})";
+  // Generate the Regex pattern for matching all the suggestions in one.
+  AnnotationEditingController(this._mapping)
+      : _pattern = "(${_mapping.keys.map((key) => key).join('|')})";
 
+  /// Can be used to get the markup from the controller directly.
   get markupText {
     final someVal = text.splitMapJoin(
-      RegExp("$pattern"),
+      RegExp("$_pattern"),
       onMatch: (Match match) {
-        final mention = mapping[match[0]] != null
-            ? mapping[match[0]]
-            : mapping[mapping.keys.firstWhere((element) {
+        final mention = _mapping[match[0]] != null
+            ? _mapping[match[0]]
+            : _mapping[_mapping.keys.firstWhere((element) {
                 final reg = new RegExp(element);
 
                 return reg.hasMatch(match[0]);
               })];
 
+        // Default markup format for mentions
         if (!mention.disableMarkup)
           return "${mention.trigger}[__${mention.id}__](__${mention.display}__)";
         else
@@ -37,11 +42,11 @@ class AnnotationEditingController extends TextEditingController {
     List<InlineSpan> children = [];
 
     text.splitMapJoin(
-      RegExp("$pattern"),
+      RegExp("$_pattern"),
       onMatch: (Match match) {
-        final mention = mapping[match[0]] != null
-            ? mapping[match[0]]
-            : mapping[mapping.keys.firstWhere((element) {
+        final mention = _mapping[match[0]] != null
+            ? _mapping[match[0]]
+            : _mapping[_mapping.keys.firstWhere((element) {
                 final reg = new RegExp(element);
 
                 return reg.hasMatch(match[0]);
