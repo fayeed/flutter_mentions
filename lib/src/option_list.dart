@@ -22,7 +22,8 @@ class OptionList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: suggestionListDecoration,
+      decoration:
+          suggestionListDecoration ?? BoxDecoration(color: Colors.white),
       constraints: BoxConstraints(
         maxHeight: this.suggestionListHeight,
       ),

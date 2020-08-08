@@ -7,6 +7,7 @@ class FlutterMentions extends StatefulWidget {
     this.suggestionPosition = SuggestionPosition.Bottom,
     this.suggestionListHeight = 300.0,
     this.onMarkupChanged,
+    this.onMentionAdd,
     this.suggestionListDecoration,
     this.focusNode,
     this.decoration = const InputDecoration(),
@@ -52,6 +53,9 @@ class FlutterMentions extends StatefulWidget {
   ///
   /// Defaults to [SuggestionPosition.Bottom].
   final SuggestionPosition suggestionPosition;
+
+  /// Triggers when the suggestion was added by tapping on suggestion.
+  final Function(Map<String, dynamic>) onMentionAdd;
 
   /// Max height for the suggestion list
   ///
@@ -330,6 +334,8 @@ class FlutterMentionsState extends State<FlutterMentions> {
                     _selectedMention.end,
                     "${list.trigger}${value['display']}${widget.appendSpaceOnAdd ? ' ' : ''}",
                   );
+
+                  widget.onMentionAdd(value);
 
                   setState(() {
                     _showSuggestions = false;
