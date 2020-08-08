@@ -41,7 +41,8 @@ class _FlutterMentionsState extends State<FlutterMentions> {
         data["${element.trigger}([A-Za-z0-9])*"] = element.style;
 
       element.data?.forEach(
-        (e) => data["${element.trigger}${e.id}"] = element.style,
+        (e) =>
+            data["${element.trigger}${e['id']}"] = e["style"] ?? element.style,
       );
     });
 
@@ -65,7 +66,8 @@ class _FlutterMentionsState extends State<FlutterMentions> {
           final newPos = _controller.selection.baseOffset;
           pattern = widget.mentions.map((e) => e.trigger).join("|");
 
-          return element.end == newPos && element.str.contains(RegExp(pattern));
+          return element.end == newPos &&
+              element.str.toLowerCase().contains(RegExp(pattern));
         });
 
         setState(() {
@@ -95,10 +97,15 @@ class _FlutterMentionsState extends State<FlutterMentions> {
         portal: showSuggestions
             ? OptionList(
                 suggestionListHeight: widget.suggestionListHeight,
-                data: list.data
-                    .where((element) => element.id.toLowerCase().contains(
-                        selectedMention.str.replaceAll(RegExp(pattern), "")))
-                    .toList(),
+                suggestionBuilder: list.suggestionBuilder,
+                data: list.data.where((element) {
+                  final ele = element["id"].toLowerCase();
+                  final str = selectedMention.str
+                      .toLowerCase()
+                      .replaceAll(RegExp(pattern), "");
+
+                  return ele == str ? false : ele.contains(str);
+                }).toList(),
                 onTap: (value) {
                   _controller.text = _controller.value.text.replaceRange(
                     selectedMention.start,

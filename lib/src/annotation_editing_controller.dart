@@ -20,8 +20,6 @@ class AnnotationEditingController extends TextEditingController {
             : mapping[mapping.keys.firstWhere((element) {
                 final reg = new RegExp(element);
 
-                print("regex matches: ${match[0]} ${reg.hasMatch(match[0])}");
-
                 return reg.hasMatch(match[0]);
               })];
 
