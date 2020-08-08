@@ -73,3 +73,10 @@ build/
 !**/ios/**/default.pbxuser
 !**/ios/**/default.perspectivev3
 !/packages/flutter_tools/test/data/dart_dependencies_test/**/.packages
+
+example/android
+example/ios
+example/.vscode
+example/Readme.md
+example/pubspec.lock
+example/test
