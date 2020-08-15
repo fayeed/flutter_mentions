@@ -21,7 +21,7 @@ Then, run `flutter packages get` in your terminal.
 
 ## Usage 💻
 
-To use this package you must first wrap your top most widget with `Portal` as this pakage uses `flutter_portal` to show the suggestions list.
+To use this package you must first wrap your top most widget with `Portal` as this package uses `flutter_portal` to show the suggestions list.
 
 > [Portal], is the equivalent of [Overlay].
 >
