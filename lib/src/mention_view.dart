@@ -48,7 +48,7 @@ class FlutterMentions extends StatefulWidget {
   }) : super(key: key);
 
   /// text
-  final text;
+  final String text;
 
   /// List of Mention that the user is allowed to triggered
   final List<Mention> mentions;
