@@ -4,7 +4,7 @@ class FlutterMentions extends StatefulWidget {
   FlutterMentions({
     @required this.mentions,
     Key key,
-    this.text,
+    this.defaultText,
     this.suggestionPosition = SuggestionPosition.Bottom,
     this.suggestionListHeight = 300.0,
     this.onMarkupChanged,
@@ -48,7 +48,7 @@ class FlutterMentions extends StatefulWidget {
   }) : super(key: key);
 
   /// text
-  final String text;
+  final String defaultText;
 
   /// List of Mention that the user is allowed to triggered
   final List<Mention> mentions;
@@ -269,7 +269,7 @@ class FlutterMentionsState extends State<FlutterMentions> {
 
     controller = AnnotationEditingController(data);
 
-    controller.text = widget.text;
+    controller.text = widget.defaultText;
     
     // setup a listener to figure out which suggestions to show based on the trigger
     controller.addListener(() {
