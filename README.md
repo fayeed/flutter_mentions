@@ -54,7 +54,9 @@ To use this package you must first wrap your top most widget with `Portal` as th
 - `suggestionListHeight: double` - Max height for the suggestion list. Defaults for 300.0.
 - `onMarkupChanged: Function(String)` - A Functioned which is triggered when ever the input changes but with the markup of the selected mentions.
 - `suggestionListDecoration: BoxDecoration` - Decoration for the Suggestion list.
+- `text: String` - Populate your input field with pre-filled text.
 - Supports all the other properties that `TextField` supports.
+
 
 **Mention**
 
