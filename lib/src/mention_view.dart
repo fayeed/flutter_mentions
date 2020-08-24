@@ -270,7 +270,7 @@ class FlutterMentionsState extends State<FlutterMentions> {
     controller = AnnotationEditingController(data);
 
     controller.text = widget.defaultText;
-    
+
     // setup a listener to figure out which suggestions to show based on the trigger
     controller.addListener(() {
       final cursorPos = controller.selection.baseOffset;
@@ -298,6 +298,17 @@ class FlutterMentionsState extends State<FlutterMentions> {
         setState(() {
           _showSuggestions = val != -1;
           _selectedMention = val == -1 ? null : lengthMap[val];
+        });
+      } else {
+        setState(() {
+          _showSuggestions = false;
+        });
+      }
+
+// when focus has been removed form textField, hide suggestions
+      if ((widget.focusNode?.hasFocus) ?? false) {
+        setState(() {
+          _showSuggestions = false;
         });
       }
     });
