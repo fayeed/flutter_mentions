@@ -305,7 +305,10 @@ class FlutterMentionsState extends State<FlutterMentions> {
         });
       }
 
-// when focus has been removed form textField, hide suggestions
+
+    });
+
+    // when focus has been removed form textField, hide suggestions
       if (widget.focusNode != null) {
         if (widget.focusNode.hasFocus == false) {
           setState(() {
@@ -313,7 +316,6 @@ class FlutterMentionsState extends State<FlutterMentions> {
           });
         }
       }
-    });
 
     super.initState();
   }
