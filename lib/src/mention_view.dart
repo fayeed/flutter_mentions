@@ -270,7 +270,7 @@ class FlutterMentionsState extends State<FlutterMentions> {
     controller = AnnotationEditingController(data);
 
     controller.text = widget.defaultText;
-    
+
     // setup a listener to figure out which suggestions to show based on the trigger
     controller.addListener(() {
       final cursorPos = controller.selection.baseOffset;
@@ -343,6 +343,14 @@ class FlutterMentionsState extends State<FlutterMentions> {
                   );
 
                   if (widget.onMentionAdd != null) widget.onMentionAdd(value);
+
+                  // Move the cursor to next position after the new mentioned item.
+                  int nextCursorPosition =
+                      _selectedMention.start + 1 + value['display']?.length ??
+                          0;
+                  if (widget.appendSpaceOnAdd) nextCursorPosition++;
+                  controller.selection = TextSelection.fromPosition(
+                      TextPosition(offset: nextCursorPosition));
 
                   setState(() {
                     _showSuggestions = false;
