@@ -275,7 +275,7 @@ class FlutterMentionsState extends State<FlutterMentions> {
     controller.addListener(() {
       final cursorPos = controller.selection.baseOffset;
 
-      if (cursorPos - 1 > 0) {
+      if (cursorPos >= 0) {
         var _pos = 0;
 
         final lengthMap = <LengthMap>[];
