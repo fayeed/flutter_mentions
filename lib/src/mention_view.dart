@@ -248,23 +248,24 @@ class FlutterMentionsState extends State<FlutterMentions> {
         );
       }
 
-      element.data?.forEach(
-        (e) => data["${element.trigger}${e['display']}"] = e['style'] != null
-            ? Annotation(
-                style: e['style'],
-                id: e['id'],
-                display: e['display'],
-                trigger: element.trigger,
-                disableMarkup: element.disableMarkup,
-              )
-            : Annotation(
-                style: element.style,
-                id: e['id'],
-                display: e['display'],
-                trigger: element.trigger,
-                disableMarkup: element.disableMarkup,
-              ),
-      );
+      element.data
+          ?.forEach((e) => (e['searchable_text'] as String).split(' Z').forEach(
+                (text) => data['${element.trigger}$text'] = e['style'] != null
+                    ? Annotation(
+                        style: e['style'],
+                        id: e['id'],
+                        display: e['display'],
+                        trigger: element.trigger,
+                        disableMarkup: element.disableMarkup,
+                      )
+                    : Annotation(
+                        style: element.style,
+                        id: e['id'],
+                        display: e['display'],
+                        trigger: element.trigger,
+                        disableMarkup: element.disableMarkup,
+                      ),
+              ));
     });
 
     controller = AnnotationEditingController(data);
@@ -327,7 +328,7 @@ class FlutterMentionsState extends State<FlutterMentions> {
                 suggestionBuilder: list.suggestionBuilder,
                 suggestionListDecoration: widget.suggestionListDecoration,
                 data: list.data.where((element) {
-                  final ele = element['display'].toLowerCase();
+                  final ele = element['searchable_text'].toLowerCase();
                   final str = _selectedMention.str
                       .toLowerCase()
                       .replaceAll(RegExp(_pattern), '');
