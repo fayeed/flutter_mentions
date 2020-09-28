@@ -10,6 +10,7 @@ class FlutterMentions extends StatefulWidget {
     this.suggestionListHeight = 300.0,
     this.onMarkupChanged,
     this.onMentionAdd,
+    this.onSearchChanged,
     this.suggestionListDecoration,
     this.focusNode,
     this.decoration = const InputDecoration(),
@@ -76,6 +77,8 @@ class FlutterMentions extends StatefulWidget {
   ///
   /// This is an optional porperty.
   final ValueChanged<String> onMarkupChanged;
+
+  final void Function(String trigger, String value) onSearchChanged;
 
   /// Decoration for the Suggestion list.
   final BoxDecoration suggestionListDecoration;
@@ -411,9 +414,19 @@ class FlutterMentionsState extends State<FlutterMentions> {
           scrollPhysics: widget.scrollPhysics,
           controller: controller,
           onChanged: (text) {
-            if (widget.onChanged != null) widget.onChanged(text);
+            if (widget.onChanged != null) {
+              widget.onChanged(text);
+            }
+
             if (widget.onMarkupChanged != null) {
               widget.onMarkupChanged(controller.markupText);
+            }
+
+            if (widget.onSearchChanged != null &&
+                _selectedMention.str != null) {
+              final str = _selectedMention.str.toLowerCase();
+
+              widget.onSearchChanged(str[0], str.substring(1));
             }
           },
         ),
