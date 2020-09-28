@@ -14,7 +14,7 @@ You will need to add `flutter_mentions` to your `pubspec.yaml`:
 dependencies:
   flutter:
     sdk: flutter
-  flutter_mentions: ^0.0.1
+  flutter_mentions:
 ```
 
 Then, run `flutter packages get` in your terminal.
@@ -25,24 +25,24 @@ To use this package you must first wrap your top most widget with `Portal` as th
 
 > [Portal], is the equivalent of [Overlay].
 >
->  This widget will need to be inserted above the widget that needs to render
->  _under_ your overlays.
+> This widget will need to be inserted above the widget that needs to render
+> _under_ your overlays.
 >
->  If you want to display your overlays on the top of _everything_, a good place
->  to insert that [Portal] is above `MaterialApp`:
+> If you want to display your overlays on the top of _everything_, a good place
+> to insert that [Portal] is above `MaterialApp`:
 >
->  ```dart
->  Portal(
->    child: MaterialApp(
->      ...
->    )
->  );
->  ```
+> ```dart
+> Portal(
+>   child: MaterialApp(
+>     ...
+>   )
+> );
+> ```
 >
->  (works for `CupertinoApp` too)
+> (works for `CupertinoApp` too)
 >
->  This way [Portal] will render above everything. But you could place it
->  somewhere else to change the clip behavior.
+> This way [Portal] will render above everything. But you could place it
+> somewhere else to change the clip behavior.
 
 ### Widgets:
 
@@ -55,17 +55,20 @@ To use this package you must first wrap your top most widget with `Portal` as th
 - `onMarkupChanged: Function(String)` - A Functioned which is triggered when ever the input changes but with the markup of the selected mentions.
 - `suggestionListDecoration: BoxDecoration` - Decoration for the Suggestion list.
 - `defaultText: String` - Populate your input field with pre-filled text.
+- `onSearchChange: Function(String trigger, String value)` - Fired only when the input changes & user is searching a mention item.
+- `leading: List<Widget>` - List of widgets that should be placed before the input.
+- `trailing: List<Widget>` - List of widgets that should be placed after the input.
 - Supports all the other properties that `TextField` supports.
-
 
 **Mention**
 
 - `trigger: String` - A single character that will be used to trigger the suggestions.
-- `data: List<Map<String, dynamic>>` - List of Map to represent the suggestions shown to the user. You need to provide two **Required** properties `id` & `display` both are [String] You can also have any custom properties as you like to build custom suggestion widget.
+- `data: List<Map<String, dynamic>>` - List of Map to represent the suggestions shown to the user. You need to provide two **Required** properties `id` & `display` both are [String] You can also have any custom properties as you like to build custom suggestion widget (**NOTE:** this can later be updated to show new or filtered mention list).
 - `style: TextStyle` - Style for the mention item in Input.
 - `matchAll: bool` - Should every non-suggestion with the trigger character be matched.
 - `disableMarkup: bool` - Should the markup generation be disabled for this Mention Item.
 - `suggestionBuilder: Widget Function(Map<String, dynamic>)` - Build Custom suggestion widget using this builder.
+- `markupBuilder: String Function(String trigger, String mention, String value)` - Used to define how the mentions markup should be saved.
 
 > example, Mention instance
 
@@ -84,7 +87,7 @@ Mention(
 )
 ```
 
-### Example
+## Example
 
 ```dart
 FlutterMentions(
@@ -111,10 +114,21 @@ FlutterMentions(
       ],
     )
   ],
-),       
+),
 ```
 
 You can find detailed example in [example folder](https://github.com/fayeed/flutter_mentions/blob/master/example/lib/main.dart)
+
+## Frequently asked questions
+
+**1. How do I can access to the the editing controller?**
+A. To get the control of `TextEditingController` just use a Global key more info can be found here [#13](https://github.com/fayeed/flutter_mentions/issues/13). This will also allow you to access the `text` & `markupText`.
+
+**2. How do I search users as I type?**
+A. Just use the `onSearchChange` to get the currrent search text & make request to the server and later update the data.
+
+**3. What is the need of Portal?**
+A. You should check this [comment](https://github.com/fayeed/flutter_mentions/issues/1#issuecomment-671805877) where I mentioned in more detail the reason behind using portal.
 
 ## Credits 👨🏻‍💻
 
