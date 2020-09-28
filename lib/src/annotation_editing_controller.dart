@@ -3,8 +3,8 @@ part of flutter_mentions;
 /// A custom implementation of [TextEditingController] to support @ mention or other
 /// trigger based mentions.
 class AnnotationEditingController extends TextEditingController {
-  final Map<String, Annotation> _mapping;
-  final String _pattern;
+  Map<String, Annotation> _mapping;
+  String _pattern;
   final String Function(String trigger, String mention, String value)
       markupBuilder;
 
@@ -41,6 +41,16 @@ class AnnotationEditingController extends TextEditingController {
     return someVal;
   }
 
+  Map<String, Annotation> get mapping {
+    return _mapping;
+  }
+
+  set mapping(Map<String, Annotation> _mapping) {
+    this._mapping = _mapping;
+
+    _pattern = "(${_mapping.keys.map((key) => key).join('|')})";
+  }
+
   @override
   TextSpan buildTextSpan({TextStyle style, bool withComposing}) {
     var children = <InlineSpan>[];
@@ -68,6 +78,7 @@ class AnnotationEditingController extends TextEditingController {
         return '';
       },
     );
+
     return TextSpan(style: style, children: children);
   }
 }

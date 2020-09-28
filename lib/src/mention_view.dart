@@ -236,8 +236,7 @@ class FlutterMentionsState extends State<FlutterMentions> {
   LengthMap _selectedMention;
   String _pattern = '';
 
-  @override
-  void initState() {
+  Map<String, Annotation> mapToAnotation() {
     final data = <String, Annotation>{};
 
     // Loop over all the mention items and generate a suggestions matching list
@@ -271,6 +270,13 @@ class FlutterMentionsState extends State<FlutterMentions> {
               ),
       );
     });
+
+    return data;
+  }
+
+  @override
+  void initState() {
+    final data = mapToAnotation();
 
     controller = AnnotationEditingController(data, widget.markupBuilder);
 
@@ -308,6 +314,13 @@ class FlutterMentionsState extends State<FlutterMentions> {
     });
 
     super.initState();
+  }
+
+  @override
+  void didUpdateWidget(widget) {
+    super.didUpdateWidget(widget);
+
+    controller.mapping = mapToAnotation();
   }
 
   @override
