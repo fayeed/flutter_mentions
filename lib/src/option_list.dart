@@ -24,7 +24,7 @@ class OptionList extends StatelessWidget {
     return data.isNotEmpty
         ? Container(
             decoration:
-                suggestionListDecoration ?? BoxDecoration(color: Colors.green),
+                suggestionListDecoration ?? BoxDecoration(color: Colors.white),
             constraints: BoxConstraints(
               maxHeight: suggestionListHeight,
               minHeight: 0,
