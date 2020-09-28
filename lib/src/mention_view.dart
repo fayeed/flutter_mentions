@@ -5,6 +5,7 @@ class FlutterMentions extends StatefulWidget {
     @required this.mentions,
     Key key,
     this.defaultText,
+    this.markupBuilder,
     this.suggestionPosition = SuggestionPosition.Bottom,
     this.suggestionListHeight = 300.0,
     this.onMarkupChanged,
@@ -49,6 +50,10 @@ class FlutterMentions extends StatefulWidget {
 
   /// text
   final String defaultText;
+
+  /// Allows to set custom markup for the mentioned item.
+  final String Function(String trigger, String mention, String value)
+      markupBuilder;
 
   /// List of Mention that the user is allowed to triggered
   final List<Mention> mentions;
@@ -267,7 +272,7 @@ class FlutterMentionsState extends State<FlutterMentions> {
       );
     });
 
-    controller = AnnotationEditingController(data);
+    controller = AnnotationEditingController(data, widget.markupBuilder);
 
     controller.text = widget.defaultText;
 
