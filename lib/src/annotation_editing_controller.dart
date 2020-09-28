@@ -5,11 +5,9 @@ part of flutter_mentions;
 class AnnotationEditingController extends TextEditingController {
   Map<String, Annotation> _mapping;
   String _pattern;
-  final String Function(String trigger, String mention, String value)
-      markupBuilder;
 
   // Generate the Regex pattern for matching all the suggestions in one.
-  AnnotationEditingController(this._mapping, this.markupBuilder)
+  AnnotationEditingController(this._mapping)
       : _pattern = "(${_mapping.keys.map((key) => key).join('|')})";
 
   /// Can be used to get the markup from the controller directly.
@@ -26,8 +24,9 @@ class AnnotationEditingController extends TextEditingController {
 
         // Default markup format for mentions
         if (!mention.disableMarkup) {
-          return markupBuilder != null
-              ? markupBuilder(mention.trigger, mention.id, mention.display)
+          return mention.markupBuilder != null
+              ? mention.markupBuilder(
+                  mention.trigger, mention.id, mention.display)
               : '${mention.trigger}[__${mention.id}__](__${mention.display}__)';
         } else {
           return match[0];
