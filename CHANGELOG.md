@@ -1,4 +1,13 @@
-## [0.1.3] - 99 Sep 2020
+## [1.0.0] - 28 Sep 2020
+
+- `markupBuilder` added to allow users to add custom markups for mentions.
+- `onSearchChange` property added.
+- Mentions are now updated if mentions dependency is updated.
+- `leading` & `trailing` widgets property added.
+- Fixed an issue where if no mentions was found the list container would still be visible without any mentions.
+- Readme updated with FAQs.
+
+## [0.1.3] - 9 Sep 2020
 
 - Fixed an issue were mentions list was not triggered at position 0 closes issue [#9](https://github.com/fayeed/flutter_mentions/issues/9).
 
