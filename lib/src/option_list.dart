@@ -29,7 +29,6 @@ class OptionList extends StatelessWidget {
               maxHeight: suggestionListHeight,
               minHeight: 0,
             ),
-            width: MediaQuery.of(context).size.width,
             child: ListView.builder(
               itemCount: data.length,
               shrinkWrap: true,
