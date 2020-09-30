@@ -57,19 +57,22 @@ class AnnotationEditingController extends TextEditingController {
     text.splitMapJoin(
       RegExp('$_pattern'),
       onMatch: (Match match) {
-        final mention = _mapping[match[0]] ??
-            _mapping[_mapping.keys.firstWhere((element) {
-              final reg = RegExp(element);
+        if (_mapping.isNotEmpty) {
+          final mention = _mapping[match[0]] ??
+              _mapping[_mapping.keys.firstWhere((element) {
+                final reg = RegExp(element);
 
-              return reg.hasMatch(match[0]);
-            })];
+                return reg.hasMatch(match[0]);
+              })];
 
-        children.add(
-          TextSpan(
-            text: match[0],
-            style: style.merge(mention.style),
-          ),
-        );
+          children.add(
+            TextSpan(
+              text: match[0],
+              style: style.merge(mention.style),
+            ),
+          );
+        }
+
         return '';
       },
       onNonMatch: (String text) {

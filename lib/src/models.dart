@@ -12,7 +12,7 @@ class LengthMap {
 
 class Mention {
   Mention({
-    this.data,
+    this.data = const [],
     this.style,
     this.trigger,
     this.matchAll = false,
