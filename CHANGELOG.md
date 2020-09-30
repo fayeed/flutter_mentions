@@ -1,3 +1,8 @@
+## [1.0.1] - 30 Sep 2020
+
+- `hideSuggestionList` property added.
+- Provided a funtion to manually add mentions.
+
 ## [1.0.0] - 28 Sep 2020
 
 - `markupBuilder` added to allow users to add custom markups for mentions.
