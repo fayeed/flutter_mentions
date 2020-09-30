@@ -48,7 +48,10 @@ class FlutterMentions extends StatefulWidget {
     this.scrollController,
     this.autofillHints,
     this.appendSpaceOnAdd = true,
+    this.hideSuggestionList = false,
   }) : super(key: key);
+
+  final bool hideSuggestionList;
 
   /// text
   final String defaultText;
@@ -285,6 +288,29 @@ class FlutterMentionsState extends State<FlutterMentions> {
     return data;
   }
 
+  void addMention(Map<String, dynamic> value, [Mention list]) {
+    final _list = list ?? _selectedMention != null
+        ? widget.mentions.firstWhere(
+            (element) => _selectedMention.str.contains(element.trigger))
+        : widget.mentions[0];
+
+    // find the text by range and replace with the new value.
+    controller.text = controller.value.text.replaceRange(
+      _selectedMention.start,
+      _selectedMention.end,
+      "${_list.trigger}${value['display']}${widget.appendSpaceOnAdd ? ' ' : ''}",
+    );
+
+    if (widget.onMentionAdd != null) widget.onMentionAdd(value);
+
+    // Move the cursor to next position after the new mentioned item.
+    int nextCursorPosition =
+        _selectedMention.start + 1 + value['display']?.length ?? 0;
+    if (widget.appendSpaceOnAdd) nextCursorPosition++;
+    controller.selection =
+        TextSelection.fromPosition(TextPosition(offset: nextCursorPosition));
+  }
+
   @override
   void initState() {
     final data = mapToAnotation();
@@ -350,7 +376,7 @@ class FlutterMentionsState extends State<FlutterMentions> {
         childAnchor: widget.suggestionPosition == SuggestionPosition.Bottom
             ? Alignment.bottomCenter
             : Alignment.topCenter,
-        portal: _showSuggestions
+        portal: _showSuggestions && !widget.hideSuggestionList
             ? OptionList(
                 suggestionListHeight: widget.suggestionListHeight,
                 suggestionBuilder: list.suggestionBuilder,
@@ -364,23 +390,7 @@ class FlutterMentionsState extends State<FlutterMentions> {
                   return ele == str ? false : ele.contains(str);
                 }).toList(),
                 onTap: (value) {
-                  // find the text by range and replace with the new value.
-                  controller.text = controller.value.text.replaceRange(
-                    _selectedMention.start,
-                    _selectedMention.end,
-                    "${list.trigger}${value['display']}${widget.appendSpaceOnAdd ? ' ' : ''}",
-                  );
-
-                  if (widget.onMentionAdd != null) widget.onMentionAdd(value);
-
-                  // Move the cursor to next position after the new mentioned item.
-                  int nextCursorPosition =
-                      _selectedMention.start + 1 + value['display']?.length ??
-                          0;
-                  if (widget.appendSpaceOnAdd) nextCursorPosition++;
-                  controller.selection = TextSelection.fromPosition(
-                      TextPosition(offset: nextCursorPosition));
-
+                  addMention(value, list);
                   setState(() {
                     _showSuggestions = false;
                   });
