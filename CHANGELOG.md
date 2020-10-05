@@ -1,3 +1,8 @@
+## [1.0.3] - 5 Oct 2020
+
+- `onSuggestionVisibleChanged` added - Triggers when the suggestion list visibility changed.
+- `controller.showSuggestion` value notifier added.
+
 ## [1.0.2] - 5 Oct 2020
 
 - Updated depencies.
