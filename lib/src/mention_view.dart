@@ -289,7 +289,7 @@ class FlutterMentionsState extends State<FlutterMentions> {
   }
 
   void addMention(Map<String, dynamic> value, [Mention list]) {
-    final _list = list ?? _selectedMention != null
+    final _list = list != null ?? _selectedMention != null
         ? widget.mentions.firstWhere(
             (element) => _selectedMention.str.contains(element.trigger))
         : widget.mentions[0];
