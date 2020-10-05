@@ -311,6 +311,52 @@ class FlutterMentionsState extends State<FlutterMentions> {
         TextSelection.fromPosition(TextPosition(offset: nextCursorPosition));
   }
 
+  void suggestionListerner() {
+    final cursorPos = controller.selection.baseOffset;
+
+    if (cursorPos >= 0) {
+      var _pos = 0;
+
+      final lengthMap = <LengthMap>[];
+
+      // split on each word and generate a list with start & end position of each word.
+      controller.value.text.split(RegExp(r'(\s)')).forEach((element) {
+        lengthMap.add(
+            LengthMap(str: element, start: _pos, end: _pos + element.length));
+
+        _pos = _pos + element.length + 1;
+      });
+
+      final val = lengthMap.indexWhere((element) {
+        _pattern = widget.mentions.map((e) => e.trigger).join('|');
+
+        return element.end == cursorPos &&
+            element.str.toLowerCase().contains(RegExp(_pattern));
+      });
+
+      setState(() {
+        _showSuggestions = val != -1;
+        _selectedMention = val == -1 ? null : lengthMap[val];
+      });
+    }
+  }
+
+  void inputListeners() {
+    if (widget.onChanged != null) {
+      widget.onChanged(controller.text);
+    }
+
+    if (widget.onMarkupChanged != null) {
+      widget.onMarkupChanged(controller.markupText);
+    }
+
+    if (widget.onSearchChanged != null && _selectedMention.str != null) {
+      final str = _selectedMention.str.toLowerCase();
+
+      widget.onSearchChanged(str[0], str.substring(1));
+    }
+  }
+
   @override
   void initState() {
     final data = mapToAnotation();
@@ -320,37 +366,19 @@ class FlutterMentionsState extends State<FlutterMentions> {
     controller.text = widget.defaultText;
 
     // setup a listener to figure out which suggestions to show based on the trigger
-    controller.addListener(() {
-      final cursorPos = controller.selection.baseOffset;
+    controller.addListener(suggestionListerner);
 
-      if (cursorPos >= 0) {
-        var _pos = 0;
-
-        final lengthMap = <LengthMap>[];
-
-        // split on each word and generate a list with start & end position of each word.
-        controller.value.text.split(RegExp(r'(\s)')).forEach((element) {
-          lengthMap.add(
-              LengthMap(str: element, start: _pos, end: _pos + element.length));
-
-          _pos = _pos + element.length + 1;
-        });
-
-        final val = lengthMap.indexWhere((element) {
-          _pattern = widget.mentions.map((e) => e.trigger).join('|');
-
-          return element.end == cursorPos &&
-              element.str.toLowerCase().contains(RegExp(_pattern));
-        });
-
-        setState(() {
-          _showSuggestions = val != -1;
-          _selectedMention = val == -1 ? null : lengthMap[val];
-        });
-      }
-    });
+    controller.addListener(inputListeners);
 
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    controller.removeListener(suggestionListerner);
+    controller.removeListener(inputListeners);
+
+    super.dispose();
   }
 
   @override
@@ -435,22 +463,6 @@ class FlutterMentionsState extends State<FlutterMentions> {
                 scrollPadding: widget.scrollPadding,
                 scrollPhysics: widget.scrollPhysics,
                 controller: controller,
-                onChanged: (text) {
-                  if (widget.onChanged != null) {
-                    widget.onChanged(text);
-                  }
-
-                  if (widget.onMarkupChanged != null) {
-                    widget.onMarkupChanged(controller.markupText);
-                  }
-
-                  if (widget.onSearchChanged != null &&
-                      _selectedMention.str != null) {
-                    final str = _selectedMention.str.toLowerCase();
-
-                    widget.onSearchChanged(str[0], str.substring(1));
-                  }
-                },
               ),
             ),
             ...widget.trailing,
