@@ -46,7 +46,7 @@ To use this package you must first wrap your top most widget with `Portal` as th
 
 ### Widgets:
 
-**FlutterMention :**
+**FlutterMention**
 
 - `mentions: List<Mention>` - List of Mention that the user is allowed to triggered.
 - `suggestionPosition: SuggestionPosition` - Suggestion modal position, can be alligned to [Top] or [Bottom].
@@ -58,6 +58,7 @@ To use this package you must first wrap your top most widget with `Portal` as th
 - `onSearchChange: Function(String trigger, String value)` - Fired only when the input changes & user is searching a mention item.
 - `leading: List<Widget>` - List of widgets that should be placed before the input.
 - `trailing: List<Widget>` - List of widgets that should be placed after the input.
+- `onSuggestionVisibleChanged: Function(bool)` - Triggers when the suggestion list visibility changed.
 - Supports all the other properties that `TextField` supports.
 
 **Mention**

@@ -49,12 +49,16 @@ class FlutterMentions extends StatefulWidget {
     this.autofillHints,
     this.appendSpaceOnAdd = true,
     this.hideSuggestionList = false,
+    this.onSuggestionVisibleChanged,
   }) : super(key: key);
 
   final bool hideSuggestionList;
 
-  /// text
+  /// default text for the Mention Input.
   final String defaultText;
+
+  /// Triggers when the suggestion list visibility changed.
+  final Function(bool) onSuggestionVisibleChanged;
 
   /// List of Mention that the user is allowed to triggered
   final List<Mention> mentions;
@@ -243,7 +247,7 @@ class FlutterMentions extends StatefulWidget {
 
 class FlutterMentionsState extends State<FlutterMentions> {
   AnnotationEditingController controller;
-  bool _showSuggestions = false;
+  ValueNotifier<bool> showSuggestions = ValueNotifier(false);
   LengthMap _selectedMention;
   String _pattern = '';
 
@@ -334,8 +338,13 @@ class FlutterMentionsState extends State<FlutterMentions> {
             element.str.toLowerCase().contains(RegExp(_pattern));
       });
 
+      showSuggestions.value = val != -1;
+
+      if (widget.onSuggestionVisibleChanged != null) {
+        widget.onSuggestionVisibleChanged(val != -1);
+      }
+
       setState(() {
-        _showSuggestions = val != -1;
         _selectedMention = val == -1 ? null : lengthMap[val];
       });
     }
@@ -350,7 +359,7 @@ class FlutterMentionsState extends State<FlutterMentions> {
       widget.onMarkupChanged(controller.markupText);
     }
 
-    if (widget.onSearchChanged != null && _selectedMention.str != null) {
+    if (widget.onSearchChanged != null && _selectedMention?.str != null) {
       final str = _selectedMention.str.toLowerCase();
 
       widget.onSearchChanged(str[0], str.substring(1));
@@ -404,27 +413,32 @@ class FlutterMentionsState extends State<FlutterMentions> {
         childAnchor: widget.suggestionPosition == SuggestionPosition.Bottom
             ? Alignment.bottomCenter
             : Alignment.topCenter,
-        portal: _showSuggestions && !widget.hideSuggestionList
-            ? OptionList(
-                suggestionListHeight: widget.suggestionListHeight,
-                suggestionBuilder: list.suggestionBuilder,
-                suggestionListDecoration: widget.suggestionListDecoration,
-                data: list.data.where((element) {
-                  final ele = element['display'].toLowerCase();
-                  final str = _selectedMention.str
-                      .toLowerCase()
-                      .replaceAll(RegExp(_pattern), '');
+        portal: ValueListenableBuilder(
+          valueListenable: showSuggestions,
+          builder: (BuildContext context, bool show, Widget child) {
+            return show && !widget.hideSuggestionList
+                ? OptionList(
+                    suggestionListHeight: widget.suggestionListHeight,
+                    suggestionBuilder: list.suggestionBuilder,
+                    suggestionListDecoration: widget.suggestionListDecoration,
+                    data: list.data.where((element) {
+                      final ele = element['display'].toLowerCase();
+                      final str = _selectedMention.str
+                          .toLowerCase()
+                          .replaceAll(RegExp(_pattern), '');
 
-                  return ele == str ? false : ele.contains(str);
-                }).toList(),
-                onTap: (value) {
-                  addMention(value, list);
-                  setState(() {
-                    _showSuggestions = false;
-                  });
-                },
-              )
-            : Container(),
+                      return ele == str ? false : ele.contains(str);
+                    }).toList(),
+                    onTap: (value) {
+                      addMention(value, list);
+                      setState(() {
+                        showSuggestions.value = false;
+                      });
+                    },
+                  )
+                : Container();
+          },
+        ),
         child: Row(
           children: [
             ...widget.leading,
