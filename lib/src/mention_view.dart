@@ -9,6 +9,9 @@ class FlutterMentions extends StatefulWidget {
     this.suggestionListHeight = 300.0,
     this.onMarkupChanged,
     this.onMentionAdd,
+    this.onSearchChanged,
+    this.leading = const [],
+    this.trailing = const [],
     this.suggestionListDecoration,
     this.focusNode,
     this.decoration = const InputDecoration(),
@@ -45,13 +48,24 @@ class FlutterMentions extends StatefulWidget {
     this.scrollController,
     this.autofillHints,
     this.appendSpaceOnAdd = true,
+    this.hideSuggestionList = false,
   }) : super(key: key);
+
+  final bool hideSuggestionList;
 
   /// text
   final String defaultText;
 
   /// List of Mention that the user is allowed to triggered
   final List<Mention> mentions;
+
+  /// Leading widgets to show before teh Input box, helps preseve the size
+  /// size for the Portal widget size.
+  final List<Widget> leading;
+
+  /// Trailing widgets to show before teh Input box, helps preseve the size
+  /// size for the Portal widget size.
+  final List<Widget> trailing;
 
   /// Suggestion modal position, can be alligned to top or bottom.
   ///
@@ -71,6 +85,8 @@ class FlutterMentions extends StatefulWidget {
   ///
   /// This is an optional porperty.
   final ValueChanged<String> onMarkupChanged;
+
+  final void Function(String trigger, String value) onSearchChanged;
 
   /// Decoration for the Suggestion list.
   final BoxDecoration suggestionListDecoration;
@@ -231,8 +247,7 @@ class FlutterMentionsState extends State<FlutterMentions> {
   LengthMap _selectedMention;
   String _pattern = '';
 
-  @override
-  void initState() {
+  Map<String, Annotation> mapToAnotation() {
     final data = <String, Annotation>{};
 
     // Loop over all the mention items and generate a suggestions matching list
@@ -245,6 +260,7 @@ class FlutterMentionsState extends State<FlutterMentions> {
           display: null,
           trigger: element.trigger,
           disableMarkup: element.disableMarkup,
+          markupBuilder: element.markupBuilder,
         );
       }
 
@@ -256,6 +272,7 @@ class FlutterMentionsState extends State<FlutterMentions> {
                 display: e['display'],
                 trigger: element.trigger,
                 disableMarkup: element.disableMarkup,
+                markupBuilder: element.markupBuilder,
               )
             : Annotation(
                 style: element.style,
@@ -263,9 +280,40 @@ class FlutterMentionsState extends State<FlutterMentions> {
                 display: e['display'],
                 trigger: element.trigger,
                 disableMarkup: element.disableMarkup,
+                markupBuilder: element.markupBuilder,
               ),
       );
     });
+
+    return data;
+  }
+
+  void addMention(Map<String, dynamic> value, [Mention list]) {
+    final _list = list ?? _selectedMention != null
+        ? widget.mentions.firstWhere(
+            (element) => _selectedMention.str.contains(element.trigger))
+        : widget.mentions[0];
+
+    // find the text by range and replace with the new value.
+    controller.text = controller.value.text.replaceRange(
+      _selectedMention.start,
+      _selectedMention.end,
+      "${_list.trigger}${value['display']}${widget.appendSpaceOnAdd ? ' ' : ''}",
+    );
+
+    if (widget.onMentionAdd != null) widget.onMentionAdd(value);
+
+    // Move the cursor to next position after the new mentioned item.
+    int nextCursorPosition =
+        _selectedMention.start + 1 + value['display']?.length ?? 0;
+    if (widget.appendSpaceOnAdd) nextCursorPosition++;
+    controller.selection =
+        TextSelection.fromPosition(TextPosition(offset: nextCursorPosition));
+  }
+
+  @override
+  void initState() {
+    final data = mapToAnotation();
 
     controller = AnnotationEditingController(data);
 
@@ -275,7 +323,7 @@ class FlutterMentionsState extends State<FlutterMentions> {
     controller.addListener(() {
       final cursorPos = controller.selection.baseOffset;
 
-      if (cursorPos - 1 > 0) {
+      if (cursorPos >= 0) {
         var _pos = 0;
 
         final lengthMap = <LengthMap>[];
@@ -306,6 +354,13 @@ class FlutterMentionsState extends State<FlutterMentions> {
   }
 
   @override
+  void didUpdateWidget(widget) {
+    super.didUpdateWidget(widget);
+
+    controller.mapping = mapToAnotation();
+  }
+
+  @override
   Widget build(BuildContext context) {
     // Filter the list based on the selection
     final list = _selectedMention != null
@@ -321,7 +376,7 @@ class FlutterMentionsState extends State<FlutterMentions> {
         childAnchor: widget.suggestionPosition == SuggestionPosition.Bottom
             ? Alignment.bottomCenter
             : Alignment.topCenter,
-        portal: _showSuggestions
+        portal: _showSuggestions && !widget.hideSuggestionList
             ? OptionList(
                 suggestionListHeight: widget.suggestionListHeight,
                 suggestionBuilder: list.suggestionBuilder,
@@ -335,69 +390,71 @@ class FlutterMentionsState extends State<FlutterMentions> {
                   return ele == str ? false : ele.contains(str);
                 }).toList(),
                 onTap: (value) {
-                  // find the text by range and replace with the new value.
-                  controller.text = controller.value.text.replaceRange(
-                    _selectedMention.start,
-                    _selectedMention.end,
-                    "${list.trigger}${value['display']}${widget.appendSpaceOnAdd ? ' ' : ''}",
-                  );
-
-                  if (widget.onMentionAdd != null) widget.onMentionAdd(value);
-
-                  // Move the cursor to next position after the new mentioned item.
-                  int nextCursorPosition =
-                      _selectedMention.start + 1 + value['display']?.length ??
-                          0;
-                  if (widget.appendSpaceOnAdd) nextCursorPosition++;
-                  controller.selection = TextSelection.fromPosition(
-                      TextPosition(offset: nextCursorPosition));
-
+                  addMention(value, list);
                   setState(() {
                     _showSuggestions = false;
                   });
                 },
               )
             : Container(),
-        child: TextField(
-          maxLines: widget.maxLines,
-          minLines: widget.minLines,
-          maxLength: widget.maxLength,
-          focusNode: widget.focusNode,
-          keyboardType: widget.keyboardType,
-          keyboardAppearance: widget.keyboardAppearance,
-          textInputAction: widget.textInputAction,
-          textCapitalization: widget.textCapitalization,
-          style: widget.style,
-          textAlign: widget.textAlign,
-          textDirection: widget.textDirection,
-          readOnly: widget.readOnly,
-          showCursor: widget.showCursor,
-          autofocus: widget.autofocus,
-          autocorrect: widget.autocorrect,
-          maxLengthEnforced: widget.maxLengthEnforced,
-          cursorColor: widget.cursorColor,
-          cursorRadius: widget.cursorRadius,
-          cursorWidth: widget.cursorWidth,
-          buildCounter: widget.buildCounter,
-          autofillHints: widget.autofillHints,
-          decoration: widget.decoration,
-          expands: widget.expands,
-          onEditingComplete: widget.onEditingComplete,
-          onTap: widget.onTap,
-          onSubmitted: widget.onSubmitted,
-          enabled: widget.enabled,
-          enableInteractiveSelection: widget.enableInteractiveSelection,
-          enableSuggestions: widget.enableSuggestions,
-          scrollController: widget.scrollController,
-          scrollPadding: widget.scrollPadding,
-          scrollPhysics: widget.scrollPhysics,
-          controller: controller,
-          onChanged: (text) {
-            if (widget.onChanged != null) widget.onChanged(text);
-            if (widget.onMarkupChanged != null) {
-              widget.onMarkupChanged(controller.markupText);
-            }
-          },
+        child: Row(
+          children: [
+            ...widget.leading,
+            Expanded(
+              child: TextField(
+                maxLines: widget.maxLines,
+                minLines: widget.minLines,
+                maxLength: widget.maxLength,
+                focusNode: widget.focusNode,
+                keyboardType: widget.keyboardType,
+                keyboardAppearance: widget.keyboardAppearance,
+                textInputAction: widget.textInputAction,
+                textCapitalization: widget.textCapitalization,
+                style: widget.style,
+                textAlign: widget.textAlign,
+                textDirection: widget.textDirection,
+                readOnly: widget.readOnly,
+                showCursor: widget.showCursor,
+                autofocus: widget.autofocus,
+                autocorrect: widget.autocorrect,
+                maxLengthEnforced: widget.maxLengthEnforced,
+                cursorColor: widget.cursorColor,
+                cursorRadius: widget.cursorRadius,
+                cursorWidth: widget.cursorWidth,
+                buildCounter: widget.buildCounter,
+                autofillHints: widget.autofillHints,
+                decoration: widget.decoration,
+                expands: widget.expands,
+                onEditingComplete: widget.onEditingComplete,
+                onTap: widget.onTap,
+                onSubmitted: widget.onSubmitted,
+                enabled: widget.enabled,
+                enableInteractiveSelection: widget.enableInteractiveSelection,
+                enableSuggestions: widget.enableSuggestions,
+                scrollController: widget.scrollController,
+                scrollPadding: widget.scrollPadding,
+                scrollPhysics: widget.scrollPhysics,
+                controller: controller,
+                onChanged: (text) {
+                  if (widget.onChanged != null) {
+                    widget.onChanged(text);
+                  }
+
+                  if (widget.onMarkupChanged != null) {
+                    widget.onMarkupChanged(controller.markupText);
+                  }
+
+                  if (widget.onSearchChanged != null &&
+                      _selectedMention.str != null) {
+                    final str = _selectedMention.str.toLowerCase();
+
+                    widget.onSearchChanged(str[0], str.substring(1));
+                  }
+                },
+              ),
+            ),
+            ...widget.trailing,
+          ],
         ),
       ),
     );

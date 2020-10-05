@@ -12,12 +12,13 @@ class LengthMap {
 
 class Mention {
   Mention({
-    this.data,
+    this.data = const [],
     this.style,
     this.trigger,
     this.matchAll = false,
     this.suggestionBuilder,
     this.disableMarkup = false,
+    this.markupBuilder,
   });
 
   /// A single character that will be used to trigger the suggestions.
@@ -41,6 +42,10 @@ class Mention {
 
   /// Build Custom suggestion widget using this builder.
   final Widget Function(Map<String, dynamic>) suggestionBuilder;
+
+  /// Allows to set custom markup for the mentioned item.
+  final String Function(String trigger, String mention, String value)
+      markupBuilder;
 }
 
 class Annotation {
@@ -50,6 +55,7 @@ class Annotation {
     this.display,
     this.trigger,
     this.disableMarkup,
+    this.markupBuilder,
   });
 
   TextStyle style;
@@ -57,4 +63,6 @@ class Annotation {
   String display;
   String trigger;
   bool disableMarkup;
+  final String Function(String trigger, String mention, String value)
+      markupBuilder;
 }
