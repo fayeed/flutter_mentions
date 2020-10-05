@@ -1,3 +1,8 @@
+## [1.0.2] - 5 Oct 2020
+
+- Updated depencies.
+- Fixed an issue where markup was not updated if the suggestion was pressed.
+
 ## [1.0.1] - 30 Sep 2020
 
 - `hideSuggestionList` property added.
