@@ -90,7 +90,7 @@ class FlutterMentions extends StatefulWidget {
   /// This is an optional porperty.
   final ValueChanged<String> onMarkupChanged;
 
-  final void Function(String trigger, String value, bool) onSearchChanged;
+  final void Function(String trigger, String value) onSearchChanged;
 
   /// Decoration for the Suggestion list.
   final BoxDecoration suggestionListDecoration;
@@ -366,7 +366,7 @@ class FlutterMentionsState extends State<FlutterMentions> {
     if (widget.onSearchChanged != null && _selectedMention?.str != null) {
       final str = _selectedMention.str.toLowerCase();
 
-      widget.onSearchChanged(str[0], str.substring(1), showSuggestions.value);
+      widget.onSearchChanged(str[0], str.substring(1));
     }
   }
 

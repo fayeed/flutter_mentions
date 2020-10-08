@@ -1,3 +1,7 @@
+## [1.0.6] - 8 Oct 2020
+
+- Removed an unnecessary parameter from the onSearchChanged.
+
 ## [1.0.5] - 8 Oct 2020
 
 - Fixed an issue where addMention would trigger onSearchChanged with previous value.
