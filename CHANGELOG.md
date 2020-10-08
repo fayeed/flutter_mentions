@@ -1,3 +1,7 @@
+## [1.0.5] - 8 Oct 2020
+
+- Fixed an issue where addMention would trigger onSearchChanged with previous value.
+
 ## [1.0.4] - 6 Oct 2020
 
 - Fixed an issue where if there no mention data present markupText would through an error.
