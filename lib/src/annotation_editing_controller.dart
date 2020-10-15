@@ -8,7 +8,9 @@ class AnnotationEditingController extends TextEditingController {
 
   // Generate the Regex pattern for matching all the suggestions in one.
   AnnotationEditingController(this._mapping)
-      : _pattern = "(${_mapping.keys.map((key) => key).join('|')})";
+      : _pattern = _mapping.keys.isNotEmpty
+            ? "(${_mapping.keys.map((key) => key).join('|')})"
+            : null;
 
   /// Can be used to get the markup from the controller directly.
   String get markupText {
@@ -56,32 +58,36 @@ class AnnotationEditingController extends TextEditingController {
   TextSpan buildTextSpan({TextStyle style, bool withComposing}) {
     var children = <InlineSpan>[];
 
-    text.splitMapJoin(
-      RegExp('$_pattern'),
-      onMatch: (Match match) {
-        if (_mapping.isNotEmpty) {
-          final mention = _mapping[match[0]] ??
-              _mapping[_mapping.keys.firstWhere((element) {
-                final reg = RegExp(element);
+    if (_pattern == null) {
+      children.add(TextSpan(text: text, style: style));
+    } else {
+      text.splitMapJoin(
+        RegExp('$_pattern'),
+        onMatch: (Match match) {
+          if (_mapping.isNotEmpty) {
+            final mention = _mapping[match[0]] ??
+                _mapping[_mapping.keys.firstWhere((element) {
+                  final reg = RegExp(element);
 
-                return reg.hasMatch(match[0]);
-              })];
+                  return reg.hasMatch(match[0]);
+                })];
 
-          children.add(
-            TextSpan(
-              text: match[0],
-              style: style.merge(mention.style),
-            ),
-          );
-        }
+            children.add(
+              TextSpan(
+                text: match[0],
+                style: style.merge(mention.style),
+              ),
+            );
+          }
 
-        return '';
-      },
-      onNonMatch: (String text) {
-        children.add(TextSpan(text: text, style: style));
-        return '';
-      },
-    );
+          return '';
+        },
+        onNonMatch: (String text) {
+          children.add(TextSpan(text: text, style: style));
+          return '';
+        },
+      );
+    }
 
     return TextSpan(style: style, children: children);
   }
