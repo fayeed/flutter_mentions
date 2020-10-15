@@ -1,3 +1,7 @@
+## [1.0.8] - 15 Oct 2020
+
+- Fixed an issue where no data would cause the widget to crash when a emoji is entered.
+
 ## [1.0.7] - 13 Oct 2020
 
 - Fixed an issue where multiple triggers were not working.
