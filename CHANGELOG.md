@@ -1,3 +1,7 @@
+## [1.0.9] - 15 Oct 2020
+
+- Added a fix for a edge case for emoji fix from previous version.
+
 ## [1.0.8] - 15 Oct 2020
 
 - Fixed an issue where no data would cause the widget to crash when a emoji is entered.

@@ -58,7 +58,7 @@ class AnnotationEditingController extends TextEditingController {
   TextSpan buildTextSpan({TextStyle style, bool withComposing}) {
     var children = <InlineSpan>[];
 
-    if (_pattern == null) {
+    if (_pattern == null || _pattern == '()') {
       children.add(TextSpan(text: text, style: style));
     } else {
       text.splitMapJoin(
