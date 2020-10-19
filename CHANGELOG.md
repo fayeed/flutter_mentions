@@ -1,3 +1,7 @@
+## [1.0.10] - 19 Oct 2020
+
+- Fixed an issue where using special characters would crash the widget.
+
 ## [1.0.9] - 15 Oct 2020
 
 - Added a fix for a edge case for emoji fix from previous version.
