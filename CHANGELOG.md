@@ -1,3 +1,7 @@
+## [1.0.11] - 20 Oct 2020
+
+- Print statement removed from the `AnnotationEditingController`.
+
 ## [1.0.10] - 19 Oct 2020
 
 - Fixed an issue where using special characters would crash the widget.
