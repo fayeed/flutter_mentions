@@ -61,7 +61,6 @@ class AnnotationEditingController extends TextEditingController {
     if (_pattern == null || _pattern == '()') {
       children.add(TextSpan(text: text, style: style));
     } else {
-      print(_pattern);
       text.splitMapJoin(
         RegExp('$_pattern'),
         onMatch: (Match match) {
