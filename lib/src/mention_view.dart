@@ -317,8 +317,11 @@ class FlutterMentionsState extends State<FlutterMentions> {
     int nextCursorPosition =
         selectedMention.start + 1 + value['display']?.length ?? 0;
     if (widget.appendSpaceOnAdd) nextCursorPosition++;
-    controller.selection =
-        TextSelection.fromPosition(TextPosition(offset: nextCursorPosition));
+
+    Timer(
+      Duration(milliseconds: Platform.isIOS ? 20 : 0),
+      () => controller.selection = TextSelection.fromPosition(TextPosition(offset: nextCursorPosition)),
+    );
   }
 
   void suggestionListerner() {
