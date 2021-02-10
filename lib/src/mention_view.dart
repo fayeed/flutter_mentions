@@ -303,22 +303,37 @@ class FlutterMentionsState extends State<FlutterMentions> {
         ? widget.mentions.firstWhere(
             (element) => selectedMention.str.contains(element.trigger))
         : widget.mentions[0];
-
-    // find the text by range and replace with the new value.
-    controller.text = controller.value.text.replaceRange(
+    
+    final currentText = controller.text.replaceRange(
       selectedMention.start,
       selectedMention.end,
       "${_list.trigger}${value['display']}${widget.appendSpaceOnAdd ? ' ' : ''}",
     );
 
-    if (widget.onMentionAdd != null) widget.onMentionAdd(value);
+    controller.value = TextEditingValue(
+      text: currentText,
+        selection: TextSelection.fromPosition(TextPosition(offset: currentText.length))
+    );
 
-    // Move the cursor to next position after the new mentioned item.
-    int nextCursorPosition =
-        selectedMention.start + 1 + value['display']?.length ?? 0;
-    if (widget.appendSpaceOnAdd) nextCursorPosition++;
-    controller.selection =
-        TextSelection.fromPosition(TextPosition(offset: nextCursorPosition));
+    if (widget.onMentionAdd != null) widget.onMentionAdd(value);
+    
+   //-----------------------------------------------------------------
+
+    // find the text by range and replace with the new value.
+//     controller.text = controller.value.text.replaceRange(
+//       selectedMention.start,
+//       selectedMention.end,
+//       "${_list.trigger}${value['display']}${widget.appendSpaceOnAdd ? ' ' : ''}",
+//     );
+
+//     if (widget.onMentionAdd != null) widget.onMentionAdd(value);
+
+//     // Move the cursor to next position after the new mentioned item.
+//     int nextCursorPosition =
+//         selectedMention.start + 1 + value['display']?.length ?? 0;
+//     if (widget.appendSpaceOnAdd) nextCursorPosition++;
+//     controller.selection =
+//         TextSelection.fromPosition(TextPosition(offset: nextCursorPosition));
   }
 
   void suggestionListerner() {
