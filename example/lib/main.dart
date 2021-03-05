@@ -9,7 +9,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      builder: (_, child) => Portal(child: child),
+      builder: (_, child) => Portal(child: child!),
       title: 'Flutter Demo',
       theme: ThemeData(
         primarySwatch: Colors.blue,
@@ -21,9 +21,9 @@ class MyApp extends StatelessWidget {
 }
 
 class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key, this.title}) : super(key: key);
+  MyHomePage({Key? key, this.title}) : super(key: key);
 
-  final String title;
+  final String? title;
 
   @override
   _MyHomePageState createState() => _MyHomePageState();
@@ -36,7 +36,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.title),
+        title: Text(widget.title!),
       ),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.end,
@@ -44,7 +44,7 @@ class _MyHomePageState extends State<MyHomePage> {
           RaisedButton(
             child: Text('Get Text'),
             onPressed: () {
-              print(key.currentState.controller.markupText);
+              print(key.currentState!.controller!.markupText);
             },
           ),
           Container(
@@ -53,6 +53,7 @@ class _MyHomePageState extends State<MyHomePage> {
               suggestionPosition: SuggestionPosition.Top,
               maxLines: 5,
               minLines: 1,
+              decoration: InputDecoration(hintText: 'hello'),
               mentions: [
                 Mention(
                     trigger: '@',
