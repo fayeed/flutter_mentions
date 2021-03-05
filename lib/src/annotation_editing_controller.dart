@@ -4,7 +4,7 @@ part of flutter_mentions;
 /// trigger based mentions.
 class AnnotationEditingController extends TextEditingController {
   Map<String, Annotation> _mapping;
-  String _pattern;
+  String? _pattern;
 
   // Generate the Regex pattern for matching all the suggestions in one.
   AnnotationEditingController(this._mapping)
@@ -19,21 +19,21 @@ class AnnotationEditingController extends TextEditingController {
         : text.splitMapJoin(
             RegExp('$_pattern'),
             onMatch: (Match match) {
-              final mention = _mapping[match[0]] ??
+              final mention = _mapping[match[0]!] ??
                   _mapping[_mapping.keys.firstWhere((element) {
                     final reg = RegExp(element);
 
-                    return reg.hasMatch(match[0]);
-                  })];
+                    return reg.hasMatch(match[0]!);
+                  })]!;
 
               // Default markup format for mentions
               if (!mention.disableMarkup) {
                 return mention.markupBuilder != null
-                    ? mention.markupBuilder(
-                        mention.trigger, mention.id, mention.display)
+                    ? mention.markupBuilder!(
+                        mention.trigger, mention.id!, mention.display!)
                     : '${mention.trigger}[__${mention.id}__](__${mention.display}__)';
               } else {
-                return match[0];
+                return match[0]!;
               }
             },
             onNonMatch: (String text) {
@@ -55,7 +55,7 @@ class AnnotationEditingController extends TextEditingController {
   }
 
   @override
-  TextSpan buildTextSpan({TextStyle style, bool withComposing}) {
+  TextSpan buildTextSpan({TextStyle? style, bool? withComposing}) {
     var children = <InlineSpan>[];
 
     if (_pattern == null || _pattern == '()') {
@@ -65,17 +65,17 @@ class AnnotationEditingController extends TextEditingController {
         RegExp('$_pattern'),
         onMatch: (Match match) {
           if (_mapping.isNotEmpty) {
-            final mention = _mapping[match[0]] ??
+            final mention = _mapping[match[0]!] ??
                 _mapping[_mapping.keys.firstWhere((element) {
                   final reg = RegExp(element);
 
-                  return reg.hasMatch(match[0]);
-                })];
+                  return reg.hasMatch(match[0]!);
+                })]!;
 
             children.add(
               TextSpan(
                 text: match[0],
-                style: style.merge(mention.style),
+                style: style!.merge(mention.style),
               ),
             );
           }

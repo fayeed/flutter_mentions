@@ -2,8 +2,8 @@ part of flutter_mentions;
 
 class FlutterMentions extends StatefulWidget {
   FlutterMentions({
-    @required this.mentions,
-    Key key,
+    required this.mentions,
+    Key? key,
     this.defaultText,
     this.suggestionPosition = SuggestionPosition.Bottom,
     this.suggestionListHeight = 300.0,
@@ -31,7 +31,7 @@ class FlutterMentions extends StatefulWidget {
     this.readOnly = false,
     this.showCursor,
     this.maxLength,
-    this.maxLengthEnforced = true,
+    this.maxLengthEnforcement = MaxLengthEnforcement.none,
     this.onChanged,
     this.onEditingComplete,
     this.onSubmitted,
@@ -55,10 +55,10 @@ class FlutterMentions extends StatefulWidget {
   final bool hideSuggestionList;
 
   /// default text for the Mention Input.
-  final String defaultText;
+  final String? defaultText;
 
   /// Triggers when the suggestion list visibility changed.
-  final Function(bool) onSuggestionVisibleChanged;
+  final Function(bool)? onSuggestionVisibleChanged;
 
   /// List of Mention that the user is allowed to triggered
   final List<Mention> mentions;
@@ -77,7 +77,7 @@ class FlutterMentions extends StatefulWidget {
   final SuggestionPosition suggestionPosition;
 
   /// Triggers when the suggestion was added by tapping on suggestion.
-  final Function(Map<String, dynamic>) onMentionAdd;
+  final Function(Map<String, dynamic>)? onMentionAdd;
 
   /// Max height for the suggestion list
   ///
@@ -88,15 +88,15 @@ class FlutterMentions extends StatefulWidget {
   /// but with the markup of the selected mentions
   ///
   /// This is an optional porperty.
-  final ValueChanged<String> onMarkupChanged;
+  final ValueChanged<String>? onMarkupChanged;
 
-  final void Function(String trigger, String value) onSearchChanged;
+  final void Function(String trigger, String value)? onSearchChanged;
 
   /// Decoration for the Suggestion list.
-  final BoxDecoration suggestionListDecoration;
+  final BoxDecoration? suggestionListDecoration;
 
   /// Focus node for controlling the focus of the Input.
-  final FocusNode focusNode;
+  final FocusNode? focusNode;
 
   /// Should selecting a suggestion add a space at the end or not.
   final bool appendSpaceOnAdd;
@@ -105,13 +105,13 @@ class FlutterMentions extends StatefulWidget {
   final InputDecoration decoration;
 
   /// {@macro flutter.widgets.editableText.keyboardType}
-  final TextInputType keyboardType;
+  final TextInputType? keyboardType;
 
   /// The type of action button to use for the keyboard.
   ///
   /// Defaults to [TextInputAction.newline] if [keyboardType] is
   /// [TextInputType.multiline] and [TextInputAction.done] otherwise.
-  final TextInputAction textInputAction;
+  final TextInputAction? textInputAction;
 
   /// {@macro flutter.widgets.editableText.textCapitalization}
   final TextCapitalization textCapitalization;
@@ -121,16 +121,16 @@ class FlutterMentions extends StatefulWidget {
   /// This text style is also used as the base style for the [decoration].
   ///
   /// If null, defaults to the `subtitle1` text style from the current [Theme].
-  final TextStyle style;
+  final TextStyle? style;
 
   /// {@macro flutter.widgets.editableText.strutStyle}
-  final StrutStyle strutStyle;
+  final StrutStyle? strutStyle;
 
   /// {@macro flutter.widgets.editableText.textAlign}
   final TextAlign textAlign;
 
   /// {@macro flutter.widgets.editableText.textDirection}
-  final TextDirection textDirection;
+  final TextDirection? textDirection;
 
   /// {@macro flutter.widgets.editableText.autofocus}
   final bool autofocus;
@@ -145,7 +145,7 @@ class FlutterMentions extends StatefulWidget {
   final int maxLines;
 
   /// {@macro flutter.widgets.editableText.minLines}
-  final int minLines;
+  final int? minLines;
 
   /// {@macro flutter.widgets.editableText.expands}
   final bool expands;
@@ -154,7 +154,7 @@ class FlutterMentions extends StatefulWidget {
   final bool readOnly;
 
   /// {@macro flutter.widgets.editableText.showCursor}
-  final bool showCursor;
+  final bool? showCursor;
 
   /// If [maxLength] is set to this value, only the "current input length"
   /// part of the character counter is shown.
@@ -162,50 +162,50 @@ class FlutterMentions extends StatefulWidget {
 
   /// The maximum number of characters (Unicode scalar values) to allow in the
   /// text field.
-  final int maxLength;
+  final int? maxLength;
 
   /// If true, prevents the field from allowing more than [maxLength]
   /// characters.
   ///
-  /// If [maxLength] is set, [maxLengthEnforced] indicates whether or not to
+  /// If [maxLength] is set, [maxLengthEnforcement] indicates whether or not to
   /// enforce the limit, or merely provide a character counter and warning when
   /// [maxLength] is exceeded.
-  final bool maxLengthEnforced;
+  final MaxLengthEnforcement maxLengthEnforcement;
 
   /// {@macro flutter.widgets.editableText.onChanged}
-  final ValueChanged<String> onChanged;
+  final ValueChanged<String>? onChanged;
 
   /// {@macro flutter.widgets.editableText.onEditingComplete}
-  final VoidCallback onEditingComplete;
+  final VoidCallback? onEditingComplete;
 
   /// {@macro flutter.widgets.editableText.onSubmitted}
-  final ValueChanged<String> onSubmitted;
+  final ValueChanged<String>? onSubmitted;
 
   /// If false the text field is "disabled": it ignores taps and its
   /// [decoration] is rendered in grey.
   ///
   /// If non-null this property overrides the [decoration]'s
   /// [Decoration.enabled] property.
-  final bool enabled;
+  final bool? enabled;
 
   /// {@macro flutter.widgets.editableText.cursorWidth}
   final double cursorWidth;
 
   /// {@macro flutter.widgets.editableText.cursorRadius}
-  final Radius cursorRadius;
+  final Radius? cursorRadius;
 
   /// The color to use when painting the cursor.
   ///
   /// Defaults to [ThemeData.cursorColor] or [CupertinoTheme.primaryColor]
   /// depending on [ThemeData.platform] .
-  final Color cursorColor;
+  final Color? cursorColor;
 
   /// The appearance of the keyboard.
   ///
   /// This setting is only honored on iOS devices.
   ///
   /// If unset, defaults to the brightness of [ThemeData.primaryColorBrightness].
-  final Brightness keyboardAppearance;
+  final Brightness? keyboardAppearance;
 
   /// {@macro flutter.widgets.editableText.scrollPadding}
   final EdgeInsets scrollPadding;
@@ -218,7 +218,7 @@ class FlutterMentions extends StatefulWidget {
 
   /// {@template flutter.material.textfield.onTap}
   /// Called for each distinct tap except for every second tap of a double tap.
-  final GestureTapCallback onTap;
+  final GestureTapCallback? onTap;
 
   /// Callback that generates a custom [InputDecorator.counter] widget.
   ///
@@ -229,26 +229,26 @@ class FlutterMentions extends StatefulWidget {
   /// The returned widget will be wrapped in a [Semantics] widget for
   /// accessibility, but it also needs to be accessible itself.  For example,
   /// if returning a Text widget, set the [semanticsLabel] property.
-  final InputCounterWidgetBuilder buildCounter;
+  final InputCounterWidgetBuilder? buildCounter;
 
   /// {@macro flutter.widgets.editableText.scrollPhysics}
-  final ScrollPhysics scrollPhysics;
+  final ScrollPhysics? scrollPhysics;
 
   /// {@macro flutter.widgets.editableText.scrollController}
-  final ScrollController scrollController;
+  final ScrollController? scrollController;
 
   /// {@macro flutter.widgets.editableText.autofillHints}
   /// {@macro flutter.services.autofill.autofillHints}
-  final Iterable<String> autofillHints;
+  final Iterable<String>? autofillHints;
 
   @override
   FlutterMentionsState createState() => FlutterMentionsState();
 }
 
 class FlutterMentionsState extends State<FlutterMentions> {
-  AnnotationEditingController controller;
+  AnnotationEditingController? controller;
   ValueNotifier<bool> showSuggestions = ValueNotifier(false);
-  LengthMap _selectedMention;
+  LengthMap? _selectedMention;
   String _pattern = '';
 
   Map<String, Annotation> mapToAnotation() {
@@ -268,7 +268,7 @@ class FlutterMentionsState extends State<FlutterMentions> {
         );
       }
 
-      element.data?.forEach(
+      element.data.forEach(
         (e) => data["${element.trigger}${e['display']}"] = e['style'] != null
             ? Annotation(
                 style: e['style'],
@@ -292,37 +292,35 @@ class FlutterMentionsState extends State<FlutterMentions> {
     return data;
   }
 
-  void addMention(Map<String, dynamic> value, [Mention list]) {
-    final selectedMention = _selectedMention;
+  void addMention(Map<String, dynamic> value, [Mention? list]) {
+    final selectedMention = _selectedMention!;
 
     setState(() {
       _selectedMention = null;
     });
 
-    final _list = selectedMention != null
-        ? widget.mentions.firstWhere(
-            (element) => selectedMention.str.contains(element.trigger))
-        : widget.mentions[0];
+    final _list = widget.mentions
+        .firstWhere((element) => selectedMention.str.contains(element.trigger));
 
     // find the text by range and replace with the new value.
-    controller.text = controller.value.text.replaceRange(
+    controller!.text = controller!.value.text.replaceRange(
       selectedMention.start,
       selectedMention.end,
       "${_list.trigger}${value['display']}${widget.appendSpaceOnAdd ? ' ' : ''}",
     );
 
-    if (widget.onMentionAdd != null) widget.onMentionAdd(value);
+    if (widget.onMentionAdd != null) widget.onMentionAdd!(value);
 
     // Move the cursor to next position after the new mentioned item.
-    int nextCursorPosition =
-        selectedMention.start + 1 + value['display']?.length ?? 0;
+    var nextCursorPosition =
+        selectedMention.start + 1 + value['display']?.length as int? ?? 0;
     if (widget.appendSpaceOnAdd) nextCursorPosition++;
-    controller.selection =
+    controller!.selection =
         TextSelection.fromPosition(TextPosition(offset: nextCursorPosition));
   }
 
   void suggestionListerner() {
-    final cursorPos = controller.selection.baseOffset;
+    final cursorPos = controller!.selection.baseOffset;
 
     if (cursorPos >= 0) {
       var _pos = 0;
@@ -330,7 +328,7 @@ class FlutterMentionsState extends State<FlutterMentions> {
       final lengthMap = <LengthMap>[];
 
       // split on each word and generate a list with start & end position of each word.
-      controller.value.text.split(RegExp(r'(\s)')).forEach((element) {
+      controller!.value.text.split(RegExp(r'(\s)')).forEach((element) {
         lengthMap.add(
             LengthMap(str: element, start: _pos, end: _pos + element.length));
 
@@ -347,7 +345,7 @@ class FlutterMentionsState extends State<FlutterMentions> {
       showSuggestions.value = val != -1;
 
       if (widget.onSuggestionVisibleChanged != null) {
-        widget.onSuggestionVisibleChanged(val != -1);
+        widget.onSuggestionVisibleChanged!(val != -1);
       }
 
       setState(() {
@@ -358,17 +356,17 @@ class FlutterMentionsState extends State<FlutterMentions> {
 
   void inputListeners() {
     if (widget.onChanged != null) {
-      widget.onChanged(controller.text);
+      widget.onChanged!(controller!.text);
     }
 
     if (widget.onMarkupChanged != null) {
-      widget.onMarkupChanged(controller.markupText);
+      widget.onMarkupChanged!(controller!.markupText);
     }
 
     if (widget.onSearchChanged != null && _selectedMention?.str != null) {
-      final str = _selectedMention.str.toLowerCase();
+      final str = _selectedMention!.str.toLowerCase();
 
-      widget.onSearchChanged(str[0], str.substring(1));
+      widget.onSearchChanged!(str[0], str.substring(1));
     }
   }
 
@@ -378,20 +376,22 @@ class FlutterMentionsState extends State<FlutterMentions> {
 
     controller = AnnotationEditingController(data);
 
-    controller.text = widget.defaultText;
+    if (widget.defaultText != null) {
+      controller!.text = widget.defaultText!;
+    }
 
     // setup a listener to figure out which suggestions to show based on the trigger
-    controller.addListener(suggestionListerner);
+    controller!.addListener(suggestionListerner);
 
-    controller.addListener(inputListeners);
+    controller!.addListener(inputListeners);
 
     super.initState();
   }
 
   @override
   void dispose() {
-    controller.removeListener(suggestionListerner);
-    controller.removeListener(inputListeners);
+    controller!.removeListener(suggestionListerner);
+    controller!.removeListener(inputListeners);
 
     super.dispose();
   }
@@ -400,7 +400,7 @@ class FlutterMentionsState extends State<FlutterMentions> {
   void didUpdateWidget(widget) {
     super.didUpdateWidget(widget);
 
-    controller.mapping = mapToAnotation();
+    controller!.mapping = mapToAnotation();
   }
 
   @override
@@ -408,7 +408,7 @@ class FlutterMentionsState extends State<FlutterMentions> {
     // Filter the list based on the selection
     final list = _selectedMention != null
         ? widget.mentions.firstWhere(
-            (element) => _selectedMention.str.contains(element.trigger))
+            (element) => _selectedMention!.str.contains(element.trigger))
         : widget.mentions[0];
 
     return Container(
@@ -421,7 +421,7 @@ class FlutterMentionsState extends State<FlutterMentions> {
             : Alignment.topCenter,
         portal: ValueListenableBuilder(
           valueListenable: showSuggestions,
-          builder: (BuildContext context, bool show, Widget child) {
+          builder: (BuildContext context, bool show, Widget? child) {
             return show && !widget.hideSuggestionList
                 ? OptionList(
                     suggestionListHeight: widget.suggestionListHeight,
@@ -429,7 +429,7 @@ class FlutterMentionsState extends State<FlutterMentions> {
                     suggestionListDecoration: widget.suggestionListDecoration,
                     data: list.data.where((element) {
                       final ele = element['display'].toLowerCase();
-                      final str = _selectedMention.str
+                      final str = _selectedMention!.str
                           .toLowerCase()
                           .replaceAll(RegExp(_pattern), '');
 
@@ -463,7 +463,7 @@ class FlutterMentionsState extends State<FlutterMentions> {
                 showCursor: widget.showCursor,
                 autofocus: widget.autofocus,
                 autocorrect: widget.autocorrect,
-                maxLengthEnforced: widget.maxLengthEnforced,
+                maxLengthEnforcement: widget.maxLengthEnforcement,
                 cursorColor: widget.cursorColor,
                 cursorRadius: widget.cursorRadius,
                 cursorWidth: widget.cursorWidth,
