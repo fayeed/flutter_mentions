@@ -1,3 +1,7 @@
+## [2.0.0-nullsafety] - 5 Mar 2021
+
+- Added null-safe support.
+
 ## [1.0.11] - 20 Oct 2020
 
 - Print statement removed from the `AnnotationEditingController`.
