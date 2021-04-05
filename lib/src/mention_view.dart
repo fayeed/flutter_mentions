@@ -421,7 +421,7 @@ class FlutterMentionsState extends State<FlutterMentions> {
             : Alignment.topCenter,
         portal: ValueListenableBuilder(
           valueListenable: showSuggestions,
-          builder: (BuildContext context, bool show, Widget child) {
+          builder: (context, show, child) {
             return show && !widget.hideSuggestionList
                 ? OptionList(
                     suggestionListHeight: widget.suggestionListHeight,
@@ -433,7 +433,7 @@ class FlutterMentionsState extends State<FlutterMentions> {
                           .toLowerCase()
                           .replaceAll(RegExp(_pattern), '');
 
-                      return ele == str ? false : ele.contains(str);
+                      return ele.contains(str);
                     }).toList(),
                     onTap: (value) {
                       addMention(value, list);

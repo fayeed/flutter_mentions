@@ -5,7 +5,7 @@ class OptionList extends StatelessWidget {
     this.data,
     this.onTap,
     this.suggestionListHeight,
-    this.suggestionBuilder,
+    @required this.suggestionBuilder,
     this.suggestionListDecoration,
   });
 
@@ -23,8 +23,10 @@ class OptionList extends StatelessWidget {
   Widget build(BuildContext context) {
     return data.isNotEmpty
         ? Container(
-            decoration:
-                suggestionListDecoration ?? BoxDecoration(color: Colors.white),
+            decoration: suggestionListDecoration ??
+                BoxDecoration(
+                  color: Colors.white,
+                ),
             constraints: BoxConstraints(
               maxHeight: suggestionListHeight,
               minHeight: 0,
@@ -34,19 +36,8 @@ class OptionList extends StatelessWidget {
               shrinkWrap: true,
               itemBuilder: (context, index) {
                 return GestureDetector(
-                  onTap: () {
-                    onTap(data[index]);
-                  },
-                  child: suggestionBuilder != null
-                      ? suggestionBuilder(data[index])
-                      : Container(
-                          color: Colors.blue,
-                          padding: EdgeInsets.all(20.0),
-                          child: Text(
-                            data[index]['display'],
-                            style: TextStyle(fontSize: 12),
-                          ),
-                        ),
+                  onTap: () => onTap(data[index]),
+                  child: suggestionBuilder(data[index]),
                 );
               },
             ),

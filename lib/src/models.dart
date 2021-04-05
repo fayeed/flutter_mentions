@@ -14,9 +14,9 @@ class Mention {
   Mention({
     this.data = const [],
     this.style,
-    this.trigger,
+    @required this.trigger,
     this.matchAll = false,
-    this.suggestionBuilder,
+    @required this.suggestionBuilder,
     this.disableMarkup = false,
     this.markupBuilder,
   });
