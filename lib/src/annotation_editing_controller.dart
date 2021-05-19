@@ -55,7 +55,7 @@ class AnnotationEditingController extends TextEditingController {
   }
 
   @override
-  TextSpan buildTextSpan({TextStyle? style, bool? withComposing}) {
+  TextSpan buildTextSpan({BuildContext? context, TextStyle? style, bool? withComposing}) {
     var children = <InlineSpan>[];
 
     if (_pattern == null || _pattern == '()') {
