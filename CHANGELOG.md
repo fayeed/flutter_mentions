@@ -1,3 +1,7 @@
+## [2.0.1] - 24 May 2021
+
+- Added support for Flutter 2.2.0
+
 ## [2.0.0-nullsafety] - 5 Mar 2021
 
 - Added null-safe support.
