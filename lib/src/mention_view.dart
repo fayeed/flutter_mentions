@@ -327,8 +327,54 @@ class FlutterMentionsState extends State<FlutterMentions> {
 
       final lengthMap = <LengthMap>[];
 
-      // split on each word and generate a list with start & end position of each word.
-      controller!.value.text.split(RegExp(r'(\s)')).forEach((element) {
+      List<String> strList = controller!.value.text.split(RegExp(r'(\s)'));
+
+      _pattern = widget.mentions.map((e) => e.trigger).join('|');
+
+      var mentionIndex = -2;
+
+      List str = widget.mentions.map((e) => e.trigger).toList();
+
+      str.forEach((element) {
+
+        var tempIndex = strList.lastIndexWhere((e) => e.contains(element));
+
+        if(tempIndex > mentionIndex){
+          mentionIndex = tempIndex;
+        }
+      });
+
+      if(strList.length -1 > mentionIndex) {
+        var i = mentionIndex + 1;
+
+        var element = strList[mentionIndex] + ' ' + strList[i];
+
+        _pattern = widget.mentions.map((e) => e.trigger).join('|');
+
+        final list = widget.mentions
+            .firstWhere(
+                (e) => element.contains(e.trigger))
+            .data;
+
+        while (!strList[i].contains(_pattern) && list.indexWhere((element2) {
+          final ele = element2['display'].toLowerCase();
+          return ele == element.substring(1).toLowerCase() ||
+              ele.contains(element.substring(1).toLowerCase());
+        }) != -1) {
+          strList[mentionIndex] = element;
+          strList[i] = "null";
+
+          if (strList.length - 1 > i) {
+            element = element + strList[++i];
+          } else {
+            break;
+          }
+        }
+      }
+
+      strList.removeWhere((element) => element == "null");
+
+      strList.forEach((element) {
         lengthMap.add(
             LengthMap(str: element, start: _pos, end: _pos + element.length));
 
@@ -379,6 +425,8 @@ class FlutterMentionsState extends State<FlutterMentions> {
     if (widget.defaultText != null) {
       controller!.text = widget.defaultText!;
     }
+
+    _pattern = widget.mentions.map((e) => e.trigger).join('|');
 
     // setup a listener to figure out which suggestions to show based on the trigger
     controller!.addListener(suggestionListerner);
