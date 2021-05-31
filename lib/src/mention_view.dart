@@ -327,8 +327,59 @@ class FlutterMentionsState extends State<FlutterMentions> {
 
       final lengthMap = <LengthMap>[];
 
-      // split on each word and generate a list with start & end position of each word.
-      controller!.value.text.split(RegExp(r'(\s)')).forEach((element) {
+      List<String> textList = controller!.value.text.split(RegExp(r'(\s)'));
+
+      _pattern = widget.mentions.map((e) => e.trigger).join('|');
+
+      var mentionIndex = -2;
+
+      List triggerList = widget.mentions.map((e) => e.trigger).toList();
+
+      triggerList.forEach((element) {
+        var triggerIndex = textList.lastIndexWhere((e) => e.contains(element));
+        if (triggerIndex > mentionIndex) {
+          mentionIndex = triggerIndex;
+        }
+      });
+
+      if (textList.length - 1 > mentionIndex && mentionIndex != -1) {
+        var nextWordIndex = mentionIndex + 1;
+
+        var mention = textList[mentionIndex] + ' ' + textList[nextWordIndex];
+
+        _pattern = widget.mentions.map((e) => e.trigger).join('|');
+
+        // Filter the list based on the latest entered mention
+        final list =
+            widget.mentions.firstWhere((e) => mention.contains(e.trigger)).data;
+
+        // Loop until the the mention is contain in given mention list or not
+        while (list.indexWhere((element) {
+              final displayName = element['display'].toLowerCase();
+              return displayName == mention.substring(1).toLowerCase() ||
+                  displayName.contains(mention.substring(1).toLowerCase());
+            }) !=
+            -1) {
+          // Assign full name mention to the list if the mention is is exist in the list
+          textList[mentionIndex] = mention;
+
+          // Assign null to the next word because it's already concatenate to the mention index word
+          textList[nextWordIndex] = "null";
+
+          // If the word is exist on the next index then concatenate it otherwise break the loop
+          if (textList.length - 1 > nextWordIndex) {
+            // concatenate the next word to the mention and again iterate the while loop with condition of check weather the mention is available or in the list or  not
+            mention = mention + ' ' + textList[++nextWordIndex];
+          } else {
+            break;
+          }
+        }
+      }
+
+      // Remove all the null entries from the list
+      textList.removeWhere((element) => element == "null");
+
+      textList.forEach((element) {
         lengthMap.add(
             LengthMap(str: element, start: _pos, end: _pos + element.length));
 
@@ -379,6 +430,8 @@ class FlutterMentionsState extends State<FlutterMentions> {
     if (widget.defaultText != null) {
       controller!.text = widget.defaultText!;
     }
+
+    _pattern = widget.mentions.map((e) => e.trigger).join('|');
 
     // setup a listener to figure out which suggestions to show based on the trigger
     controller!.addListener(suggestionListerner);
