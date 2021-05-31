@@ -327,54 +327,59 @@ class FlutterMentionsState extends State<FlutterMentions> {
 
       final lengthMap = <LengthMap>[];
 
-      List<String> strList = controller!.value.text.split(RegExp(r'(\s)'));
+      List<String> textList = controller!.value.text.split(RegExp(r'(\s)'));
 
       _pattern = widget.mentions.map((e) => e.trigger).join('|');
 
       var mentionIndex = -2;
 
-      List str = widget.mentions.map((e) => e.trigger).toList();
+      List triggerList = widget.mentions.map((e) => e.trigger).toList();
 
-      str.forEach((element) {
-
-        var tempIndex = strList.lastIndexWhere((e) => e.contains(element));
-
-        if(tempIndex > mentionIndex){
-          mentionIndex = tempIndex;
+      triggerList.forEach((element) {
+        var triggerIndex = textList.lastIndexWhere((e) => e.contains(element));
+        if (triggerIndex > mentionIndex) {
+          mentionIndex = triggerIndex;
         }
       });
 
-      if(strList.length -1 > mentionIndex) {
-        var i = mentionIndex + 1;
+      if (textList.length - 1 > mentionIndex && mentionIndex != -1) {
+        var nextWordIndex = mentionIndex + 1;
 
-        var element = strList[mentionIndex] + ' ' + strList[i];
+        var mention = textList[mentionIndex] + ' ' + textList[nextWordIndex];
 
         _pattern = widget.mentions.map((e) => e.trigger).join('|');
 
-        final list = widget.mentions
-            .firstWhere(
-                (e) => element.contains(e.trigger))
-            .data;
+        // Filter the list based on the latest entered mention
+        final list =
+            widget.mentions.firstWhere((e) => mention.contains(e.trigger)).data;
 
-        while (!strList[i].contains(_pattern) && list.indexWhere((element2) {
-          final ele = element2['display'].toLowerCase();
-          return ele == element.substring(1).toLowerCase() ||
-              ele.contains(element.substring(1).toLowerCase());
-        }) != -1) {
-          strList[mentionIndex] = element;
-          strList[i] = "null";
+        // Loop until the the mention is contain in given mention list or not
+        while (list.indexWhere((element) {
+              final displayName = element['display'].toLowerCase();
+              return displayName == mention.substring(1).toLowerCase() ||
+                  displayName.contains(mention.substring(1).toLowerCase());
+            }) !=
+            -1) {
+          // Assign full name mention to the list if the mention is is exist in the list
+          textList[mentionIndex] = mention;
 
-          if (strList.length - 1 > i) {
-            element = element + strList[++i];
+          // Assign null to the next word because it's already concatenate to the mention index word
+          textList[nextWordIndex] = "null";
+
+          // If the word is exist on the next index then concatenate it otherwise break the loop
+          if (textList.length - 1 > nextWordIndex) {
+            // concatenate the next word to the mention and again iterate the while loop with condition of check weather the mention is available or in the list or  not
+            mention = mention + ' ' + textList[++nextWordIndex];
           } else {
             break;
           }
         }
       }
 
-      strList.removeWhere((element) => element == "null");
+      // Remove all the null entries from the list
+      textList.removeWhere((element) => element == "null");
 
-      strList.forEach((element) {
+      textList.forEach((element) {
         lengthMap.add(
             LengthMap(str: element, start: _pos, end: _pos + element.length));
 
