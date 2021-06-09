@@ -116,7 +116,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       );
                     }),
                 Mention(
-                  trigger: '#',
+                  trigger: '\$',
                   disableMarkup: true,
                   style: TextStyle(
                     color: Colors.blue,
