@@ -52,10 +52,6 @@ class FlutterMentions extends StatefulWidget {
     this.onSuggestionVisibleChanged,
   }) : super(key: key);
 
-<<<<<<< HEAD
-  /// text
-  final String defaultText;
-=======
   final bool hideSuggestionList;
 
   /// default text for the Mention Input.
@@ -63,7 +59,6 @@ class FlutterMentions extends StatefulWidget {
 
   /// Triggers when the suggestion list visibility changed.
   final Function(bool)? onSuggestionVisibleChanged;
->>>>>>> upstream/master
 
   /// List of Mention that the user is allowed to triggered
   final List<Mention> mentions;
@@ -147,7 +142,7 @@ class FlutterMentions extends StatefulWidget {
   final bool enableSuggestions;
 
   /// {@macro flutter.widgets.editableText.maxLines}
-  final int maxLines;
+  final int? maxLines;
 
   /// {@macro flutter.widgets.editableText.minLines}
   final int? minLines;
@@ -297,16 +292,8 @@ class FlutterMentionsState extends State<FlutterMentions> {
     return data;
   }
 
-<<<<<<< HEAD
-    controller.text = widget.defaultText;
-
-    // setup a listener to figure out which suggestions to show based on the trigger
-    controller.addListener(() {
-      final cursorPos = controller.selection.baseOffset;
-=======
   void addMention(Map<String, dynamic> value, [Mention? list]) {
     final selectedMention = _selectedMention!;
->>>>>>> upstream/master
 
     setState(() {
       _selectedMention = null;
@@ -351,20 +338,6 @@ class FlutterMentionsState extends State<FlutterMentions> {
       final val = lengthMap.indexWhere((element) {
         _pattern = widget.mentions.map((e) => e.trigger).join('|');
 
-<<<<<<< HEAD
-        setState(() {
-          _showSuggestions = val != -1;
-          _selectedMention = val == -1 ? null : lengthMap[val];
-        });
-      } else {
-        setState(() {
-          _showSuggestions = false;
-        });
-      }
-
-
-    });
-=======
         return element.end == cursorPos &&
             element.str.toLowerCase().contains(RegExp(_pattern));
       });
@@ -411,16 +384,15 @@ class FlutterMentionsState extends State<FlutterMentions> {
     controller!.addListener(suggestionListerner);
 
     controller!.addListener(inputListeners);
->>>>>>> upstream/master
 
     // when focus has been removed form textField, hide suggestions
-      if (widget.focusNode != null) {
-        if (widget.focusNode.hasFocus == false) {
-          setState(() {
-            _showSuggestions = false;
-          });
-        }
+    if (widget.focusNode != null) {
+      if (widget.focusNode!.hasFocus == false) {
+        setState(() {
+          showSuggestions.value = false;
+        });
       }
+    }
 
     super.initState();
   }
