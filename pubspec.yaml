@@ -1,15 +1,15 @@
 name: flutter_mentions
 description: A simple flutter input widget to add @ mentions functionality to your app.
-version: 0.1.1
+version: 2.0.1
 homepage: https://github.com/fayeed/flutter_mentions
 
 environment:
-  sdk: ">=2.7.0 <3.0.0"
+  sdk: '>=2.12.0 <3.0.0'
 
 dependencies:
   flutter:
     sdk: flutter
-  flutter_portal: ^0.1.0
+  flutter_portal: ^0.4.0
 
 dev_dependencies:
   flutter_test:
