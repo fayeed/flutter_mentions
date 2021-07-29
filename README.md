@@ -61,6 +61,7 @@ To use this package you must first wrap your top most widget with `Portal` as th
 - `onSuggestionVisibleChanged: Function(bool)` - Triggers when the suggestion list visibility changed.
 - Supports all the other properties that `TextField` supports.
 
+
 **Mention**
 
 - `trigger: String` - A single character that will be used to trigger the suggestions.

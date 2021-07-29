@@ -142,7 +142,7 @@ class FlutterMentions extends StatefulWidget {
   final bool enableSuggestions;
 
   /// {@macro flutter.widgets.editableText.maxLines}
-  final int maxLines;
+  final int? maxLines;
 
   /// {@macro flutter.widgets.editableText.minLines}
   final int? minLines;
@@ -384,6 +384,15 @@ class FlutterMentionsState extends State<FlutterMentions> {
     controller!.addListener(suggestionListerner);
 
     controller!.addListener(inputListeners);
+
+    // when focus has been removed form textField, hide suggestions
+    if (widget.focusNode != null) {
+      if (widget.focusNode!.hasFocus == false) {
+        setState(() {
+          showSuggestions.value = false;
+        });
+      }
+    }
 
     super.initState();
   }
