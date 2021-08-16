@@ -5,6 +5,7 @@ class FlutterMentions extends StatefulWidget {
     required this.mentions,
     Key? key,
     this.defaultText,
+    this.disableLocalSearch = false,
     this.suggestionPosition = SuggestionPosition.Bottom,
     this.suggestionListHeight = 300.0,
     this.onMarkupChanged,
@@ -53,6 +54,9 @@ class FlutterMentions extends StatefulWidget {
   }) : super(key: key);
 
   final bool hideSuggestionList;
+
+  /// Disable local search/filter.
+  final bool disableLocalSearch;
 
   /// default text for the Mention Input.
   final String? defaultText;
@@ -427,14 +431,16 @@ class FlutterMentionsState extends State<FlutterMentions> {
                     suggestionListHeight: widget.suggestionListHeight,
                     suggestionBuilder: list.suggestionBuilder,
                     suggestionListDecoration: widget.suggestionListDecoration,
-                    data: list.data.where((element) {
-                      final ele = element['display'].toLowerCase();
-                      final str = _selectedMention!.str
-                          .toLowerCase()
-                          .replaceAll(RegExp(_pattern), '');
+                    data: widget.disableLocalSearch
+                        ? list.data
+                        : list.data.where((element) {
+                            final ele = element['display'].toLowerCase();
+                            final str = _selectedMention!.str
+                                .toLowerCase()
+                                .replaceAll(RegExp(_pattern), '');
 
-                      return ele == str ? false : ele.contains(str);
-                    }).toList(),
+                            return ele == str ? false : ele.contains(str);
+                          }).toList(),
                     onTap: (value) {
                       addMention(value, list);
                       showSuggestions.value = false;
