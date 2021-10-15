@@ -1,3 +1,6 @@
+## [2.0.2] 15 Oct 2021
+- `FlutterMentions.maxLines` is now nullable to be compatible with (TextField.maxLines)[https://api.flutter.dev/flutter/cupertino/CupertinoTextField/maxLines.html]
+
 ## [2.0.1] - 24 May 2021
 
 - Added support for Flutter 2.2.0
