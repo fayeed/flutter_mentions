@@ -51,15 +51,12 @@ class AnnotationEditingController extends TextEditingController {
   set mapping(Map<String, Annotation> _mapping) {
     this._mapping = _mapping;
 
-    _pattern =
-        "(${_mapping.keys.map((key) => RegExp.escape(key)).join('|')})(?![A-Za-z0-9_])";
+    _pattern = "(${_mapping.keys.map((key) => RegExp.escape(key)).join('|')})";
   }
 
   @override
-  TextSpan buildTextSpan(
-      {BuildContext? context, TextStyle? style, bool? withComposing}) {
+  TextSpan buildTextSpan({BuildContext? context, TextStyle? style, bool? withComposing}) {
     var children = <InlineSpan>[];
-    print(_pattern);
 
     if (_pattern == null || _pattern == '()') {
       children.add(TextSpan(text: text, style: style));
