@@ -7,15 +7,14 @@ class AnnotationEditingController extends TextEditingController {
   String? _pattern;
 
   // Generate the Regex pattern for matching all the suggestions in one.
-  AnnotationEditingController(this._mapping)
-  {
+  AnnotationEditingController(this._mapping) {
     _pattern = null;
 
-    if(_mapping.keys.isNotEmpty){
+    if (_mapping.keys.isNotEmpty) {
       var result = _mapping.keys.map((key) => RegExp.escape(key)).toList();
-      result.sort((b,a) => a.toLowerCase().compareTo(b.toLowerCase()));
+      result.sort((b, a) => a.toLowerCase().compareTo(b.toLowerCase()));
       var finalresult = result.join('|');
-      _pattern = finalresult;
+      _pattern = '($finalresult)(?![A-Za-z0-9_])';
     }
   }
 
@@ -59,15 +58,17 @@ class AnnotationEditingController extends TextEditingController {
     this._mapping = _mapping;
 
     var result = _mapping.keys.map((key) => RegExp.escape(key)).toList();
-    result.sort((b,a) => a.toLowerCase().compareTo(b.toLowerCase()));
+    result.sort((b, a) => a.toLowerCase().compareTo(b.toLowerCase()));
     var finalresult = result.join('|');
-    _pattern = finalresult;
-
+    _pattern = '($finalresult)(?![A-Za-z0-9_])';
   }
 
   @override
-  TextSpan buildTextSpan({BuildContext? context, TextStyle? style, bool? withComposing}) {
+  TextSpan buildTextSpan(
+      {BuildContext? context, TextStyle? style, bool? withComposing}) {
     var children = <InlineSpan>[];
+
+    print(_pattern);
 
     if (_pattern == null || _pattern == '()') {
       children.add(TextSpan(text: text, style: style));
