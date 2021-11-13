@@ -68,8 +68,6 @@ class AnnotationEditingController extends TextEditingController {
       {BuildContext? context, TextStyle? style, bool? withComposing}) {
     var children = <InlineSpan>[];
 
-    print(_pattern);
-
     if (_pattern == null || _pattern == '()') {
       children.add(TextSpan(text: text, style: style));
     } else {
