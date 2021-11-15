@@ -64,7 +64,7 @@ To use this package you must first wrap your top most widget with `Portal` as th
 **Mention**
 
 - `trigger: String` - A single character that will be used to trigger the suggestions.
-- `data: List<Map<String, dynamic>>` - List of Map to represent the suggestions shown to the user. You need to provide two **Required** properties `id` & `display` both are [String] You can also have any custom properties as you like to build custom suggestion widget (**NOTE:** this can later be updated to show new or filtered mention list).
+- `data: List<Map<String, dynamic>>` - List of Map to represent the suggestions shown to the user. You need to provide two **Required** properties `id` & `display` both are [String]. **Optional** property is `search` as a custom string to search for tag, defaults to `display`. You can also have any custom properties as you like to build custom suggestion widget (**NOTE:** this can later be updated to show new or filtered mention list).
 - `style: TextStyle` - Style for the mention item in Input.
 - `matchAll: bool` - Should every non-suggestion with the trigger character be matched.
 - `disableMarkup: bool` - Should the markup generation be disabled for this Mention Item.

@@ -352,12 +352,14 @@ class FlutterMentionsState extends State<FlutterMentions> {
         // Filter the list based on the latest entered mention
         final list =
             widget.mentions.firstWhere((e) => mention.contains(e.trigger)).data;
-
         // Loop until the the mention is contain in given mention list or not
         while (list.indexWhere((element) {
-              final displayName = element['display'].toLowerCase();
-              return displayName == mention.substring(1).toLowerCase() ||
-                  displayName.contains(mention.substring(1).toLowerCase());
+              final search = element['search'] ?? element['display'];
+              return search.toLowerCase() ==
+                      mention.substring(1).toLowerCase() ||
+                  search
+                      .toLowerCase()
+                      .contains(mention.substring(1).toLowerCase());
             }) !=
             -1) {
           // Assign full name mention to the list if the mention is is exist in the list
@@ -481,12 +483,16 @@ class FlutterMentionsState extends State<FlutterMentions> {
                     suggestionBuilder: list.suggestionBuilder,
                     suggestionListDecoration: widget.suggestionListDecoration,
                     data: list.data.where((element) {
-                      final ele = element['display'].toLowerCase();
+                      // final ele = element['display'].toLowerCase();
+
+                      final ele = element['search'] ?? element['display'];
                       final str = _selectedMention!.str
                           .toLowerCase()
                           .replaceAll(RegExp(_pattern), '');
 
-                      return ele == str ? false : ele.contains(str);
+                      return ele.toLowerCase() == str
+                          ? false
+                          : ele.toLowerCase().contains(str);
                     }).toList(),
                     onTap: (value) {
                       addMention(value, list);
