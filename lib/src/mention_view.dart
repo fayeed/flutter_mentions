@@ -50,6 +50,7 @@ class FlutterMentions extends StatefulWidget {
     this.appendSpaceOnAdd = true,
     this.hideSuggestionList = false,
     this.onSuggestionVisibleChanged,
+    this.textController,
   }) : super(key: key);
 
   final bool hideSuggestionList;
@@ -241,6 +242,9 @@ class FlutterMentions extends StatefulWidget {
   /// {@macro flutter.services.autofill.autofillHints}
   final Iterable<String>? autofillHints;
 
+  /// Alternative for default text controller
+  final AnnotationEditingController? textController;
+
   @override
   FlutterMentionsState createState() => FlutterMentionsState();
 }
@@ -373,8 +377,12 @@ class FlutterMentionsState extends State<FlutterMentions> {
   @override
   void initState() {
     final data = mapToAnotation();
-
-    controller = AnnotationEditingController(data);
+    if (widget.textController != null) {
+      controller = widget.textController;
+    } else {
+      controller ??= AnnotationEditingController();
+    }
+    controller!.initialise(data);
 
     if (widget.defaultText != null) {
       controller!.text = widget.defaultText!;
