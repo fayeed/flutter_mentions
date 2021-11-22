@@ -303,8 +303,7 @@ class FlutterMentionsState extends State<FlutterMentions> {
       _selectedMention = null;
     });
 
-    final _list = widget.mentions
-        .firstWhere((element) => selectedMention.str.contains(element.trigger));
+    final _list = _getSelectedMentionFromList();
 
     // find the text by range and replace with the new value.
     controller!.text = controller!.value.text.replaceRange(
@@ -413,10 +412,7 @@ class FlutterMentionsState extends State<FlutterMentions> {
   @override
   Widget build(BuildContext context) {
     // Filter the list based on the selection
-    final list = _selectedMention != null
-        ? widget.mentions.firstWhere(
-            (element) => _selectedMention!.str.contains(element.trigger))
-        : widget.mentions[0];
+    final list = _getSelectedMentionFromList();
 
     return Container(
       child: PortalEntry(
@@ -495,5 +491,17 @@ class FlutterMentionsState extends State<FlutterMentions> {
         ),
       ),
     );
+  }
+
+  Mention _getSelectedMentionFromList() {
+    return _selectedMention != null
+        ? widget.mentions.firstWhere((element) {
+            var trigger = element.trigger;
+            if (trigger.contains('\\')) {
+              trigger = trigger.substring(1);
+            }
+            return _selectedMention!.str.contains(trigger);
+          })
+        : widget.mentions[0];
   }
 }
