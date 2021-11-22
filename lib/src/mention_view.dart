@@ -400,7 +400,6 @@ class FlutterMentionsState extends State<FlutterMentions> {
   void dispose() {
     controller!.removeListener(suggestionListerner);
     controller!.removeListener(inputListeners);
-
     super.dispose();
   }
 
@@ -416,8 +415,7 @@ class FlutterMentionsState extends State<FlutterMentions> {
     // Filter the list based on the selection
     final list = _selectedMention != null
         ? widget.mentions.firstWhere(
-            (element) => _selectedMention!.str.contains(element.trigger),
-            orElse: () => widget.mentions[0])
+            (element) => _selectedMention!.str.contains(element.trigger))
         : widget.mentions[0];
 
     return Container(
