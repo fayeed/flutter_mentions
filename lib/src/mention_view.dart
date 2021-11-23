@@ -339,15 +339,17 @@ class FlutterMentionsState extends State<FlutterMentions> {
       });
 
       final val = lengthMap.indexWhere((element) {
-        _pattern = widget.mentions.map((e) => e.trigger).join('|');
+        _pattern = widget.mentions.map((e) {
+          if (e.trigger.contains(r'[')) {
+            return '\\${e.trigger}';
+          }
+          return e.trigger;
+        }).join('|');
 
         var match = false;
-        try {
-          match = element.end == cursorPos &&
-              element.str.toLowerCase().contains(RegExp(_pattern));
-        } catch (e) {
-          print(e.toString());
-        }
+        match = element.end == cursorPos &&
+            element.str.toLowerCase().contains(RegExp(_pattern));
+
         return match;
       });
 
