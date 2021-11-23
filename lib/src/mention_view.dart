@@ -341,8 +341,14 @@ class FlutterMentionsState extends State<FlutterMentions> {
       final val = lengthMap.indexWhere((element) {
         _pattern = widget.mentions.map((e) => e.trigger).join('|');
 
-        return element.end == cursorPos &&
-            element.str.toLowerCase().contains(RegExp(_pattern));
+        var match = false;
+        try {
+          match = element.end == cursorPos &&
+              element.str.toLowerCase().contains(RegExp(_pattern));
+        } catch (e) {
+          print(e.toString());
+        }
+        return match;
       });
 
       showSuggestions.value = val != -1;
