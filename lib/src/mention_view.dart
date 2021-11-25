@@ -50,6 +50,7 @@ class FlutterMentions extends StatefulWidget {
     this.appendSpaceOnAdd = true,
     this.hideSuggestionList = false,
     this.onSuggestionVisibleChanged,
+    this.textController,
   }) : super(key: key);
 
   final bool hideSuggestionList;
@@ -241,6 +242,9 @@ class FlutterMentions extends StatefulWidget {
   /// {@macro flutter.services.autofill.autofillHints}
   final Iterable<String>? autofillHints;
 
+  /// Alternative for default text controller
+  final AnnotationEditingController? textController;
+
   @override
   FlutterMentionsState createState() => FlutterMentionsState();
 }
@@ -299,8 +303,7 @@ class FlutterMentionsState extends State<FlutterMentions> {
       _selectedMention = null;
     });
 
-    final _list = widget.mentions
-        .firstWhere((element) => selectedMention.str.contains(element.trigger));
+    final _list = _getSelectedMentionFromList();
 
     // find the text by range and replace with the new value.
     controller!.text = controller!.value.text.replaceRange(
@@ -336,10 +339,18 @@ class FlutterMentionsState extends State<FlutterMentions> {
       });
 
       final val = lengthMap.indexWhere((element) {
-        _pattern = widget.mentions.map((e) => e.trigger).join('|');
+        _pattern = widget.mentions.map((e) {
+          if (e.trigger.contains(r'[')) {
+            return '\\${e.trigger}';
+          }
+          return e.trigger;
+        }).join('|');
 
-        return element.end == cursorPos &&
+        var match = false;
+        match = element.end == cursorPos &&
             element.str.toLowerCase().contains(RegExp(_pattern));
+
+        return match;
       });
 
       showSuggestions.value = val != -1;
@@ -373,8 +384,12 @@ class FlutterMentionsState extends State<FlutterMentions> {
   @override
   void initState() {
     final data = mapToAnotation();
-
-    controller = AnnotationEditingController(data);
+    if (widget.textController != null) {
+      controller = widget.textController;
+    } else {
+      controller ??= AnnotationEditingController();
+    }
+    controller!.initialise(data);
 
     if (widget.defaultText != null) {
       controller!.text = widget.defaultText!;
@@ -392,7 +407,6 @@ class FlutterMentionsState extends State<FlutterMentions> {
   void dispose() {
     controller!.removeListener(suggestionListerner);
     controller!.removeListener(inputListeners);
-
     super.dispose();
   }
 
@@ -406,10 +420,7 @@ class FlutterMentionsState extends State<FlutterMentions> {
   @override
   Widget build(BuildContext context) {
     // Filter the list based on the selection
-    final list = _selectedMention != null
-        ? widget.mentions.firstWhere(
-            (element) => _selectedMention!.str.contains(element.trigger))
-        : widget.mentions[0];
+    final list = _getSelectedMentionFromList();
 
     return Container(
       child: PortalEntry(
@@ -488,5 +499,17 @@ class FlutterMentionsState extends State<FlutterMentions> {
         ),
       ),
     );
+  }
+
+  Mention _getSelectedMentionFromList() {
+    return _selectedMention != null
+        ? widget.mentions.firstWhere((element) {
+            var trigger = element.trigger;
+            if (trigger.contains('\\')) {
+              trigger = trigger.substring(1);
+            }
+            return _selectedMention!.str.contains(trigger);
+          })
+        : widget.mentions[0];
   }
 }
