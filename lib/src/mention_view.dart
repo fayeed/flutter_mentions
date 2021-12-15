@@ -478,27 +478,30 @@ class FlutterMentionsState extends State<FlutterMentions> {
           valueListenable: showSuggestions,
           builder: (BuildContext context, bool show, Widget? child) {
             return show && !widget.hideSuggestionList
-                ? OptionList(
-                    suggestionListHeight: widget.suggestionListHeight,
-                    suggestionBuilder: list.suggestionBuilder,
-                    suggestionListDecoration: widget.suggestionListDecoration,
-                    data: list.data.where((element) {
-                      // final ele = element['display'].toLowerCase();
+                ? ConstrainedBox(
+                    constraints: BoxConstraints(maxWidth: 600.0),
+                    child: OptionList(
+                      suggestionListHeight: widget.suggestionListHeight,
+                      suggestionBuilder: list.suggestionBuilder,
+                      suggestionListDecoration: widget.suggestionListDecoration,
+                      data: list.data.where((element) {
+                        // final ele = element['display'].toLowerCase();
 
-                      final ele = element['search'] ?? element['display'];
-                      final str = _selectedMention!.str
-                          .toLowerCase()
-                          .replaceAll(RegExp(_pattern), '');
+                        final ele = element['search'] ?? element['display'];
+                        final str = _selectedMention!.str
+                            .toLowerCase()
+                            .replaceAll(RegExp(_pattern), '');
 
-                      return ele.toLowerCase() == str
-                          ? false
-                          : ele.toLowerCase().contains(str);
-                    }).toList(),
-                    onTap: (value) {
-                      addMention(value, list);
-                      showSuggestions.value = false;
-                    },
-                  )
+                        return ele.toLowerCase() == str
+                            ? false
+                            : ele.toLowerCase().contains(str);
+                      }).toList(),
+                      onTap: (value) {
+                        addMention(value, list);
+                        showSuggestions.value = false;
+                      },
+                    ),
+                )
                 : Container();
           },
         ),
