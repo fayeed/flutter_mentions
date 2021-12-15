@@ -50,6 +50,7 @@ class FlutterMentions extends StatefulWidget {
     this.appendSpaceOnAdd = true,
     this.hideSuggestionList = false,
     this.onSuggestionVisibleChanged,
+    this.optionsMaxWidth,
   }) : super(key: key);
 
   final bool hideSuggestionList;
@@ -163,6 +164,9 @@ class FlutterMentions extends StatefulWidget {
   /// The maximum number of characters (Unicode scalar values) to allow in the
   /// text field.
   final int? maxLength;
+
+  /// The maximum width of the options list
+  final double? optionsMaxWidth;
 
   /// If true, prevents the field from allowing more than [maxLength]
   /// characters.
@@ -477,32 +481,37 @@ class FlutterMentionsState extends State<FlutterMentions> {
         portal: ValueListenableBuilder(
           valueListenable: showSuggestions,
           builder: (BuildContext context, bool show, Widget? child) {
-            return show && !widget.hideSuggestionList
-                ? ConstrainedBox(
-                    constraints: BoxConstraints(maxWidth: 600.0),
-                    child: OptionList(
-                      suggestionListHeight: widget.suggestionListHeight,
-                      suggestionBuilder: list.suggestionBuilder,
-                      suggestionListDecoration: widget.suggestionListDecoration,
-                      data: list.data.where((element) {
-                        // final ele = element['display'].toLowerCase();
+            Widget child = Container();
+            if (show && !widget.hideSuggestionList) {
+              child = OptionList(
+                suggestionListHeight: widget.suggestionListHeight,
+                suggestionBuilder: list.suggestionBuilder,
+                suggestionListDecoration: widget.suggestionListDecoration,
+                data: list.data.where((element) {
+                  // final ele = element['display'].toLowerCase();
 
-                        final ele = element['search'] ?? element['display'];
-                        final str = _selectedMention!.str
-                            .toLowerCase()
-                            .replaceAll(RegExp(_pattern), '');
+                  final ele = element['search'] ?? element['display'];
+                  final str = _selectedMention!.str
+                      .toLowerCase()
+                      .replaceAll(RegExp(_pattern), '');
 
-                        return ele.toLowerCase() == str
-                            ? false
-                            : ele.toLowerCase().contains(str);
-                      }).toList(),
-                      onTap: (value) {
-                        addMention(value, list);
-                        showSuggestions.value = false;
-                      },
-                    ),
-                )
-                : Container();
+                  return ele.toLowerCase() == str
+                      ? false
+                      : ele.toLowerCase().contains(str);
+                }).toList(),
+                onTap: (value) {
+                  addMention(value, list);
+                  showSuggestions.value = false;
+                },
+              );
+              if (widget.optionsMaxWidth != null) {
+                child = ConstrainedBox(
+                  constraints: BoxConstraints(maxWidth: widget.optionsMaxWidth!),
+                  child: child,
+                );
+              }
+            }
+            return child;
           },
         ),
         child: Row(
