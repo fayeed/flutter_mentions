@@ -63,11 +63,11 @@ class FlutterMentions extends StatefulWidget {
   /// List of Mention that the user is allowed to triggered
   final List<Mention> mentions;
 
-  /// Leading widgets to show before teh Input box, helps preseve the size
+  /// Leading widgets to show before the Input box, helps preseve the size
   /// size for the Portal widget size.
   final List<Widget> leading;
 
-  /// Trailing widgets to show before teh Input box, helps preseve the size
+  /// Trailing widgets to show before the Input box, helps preseve the size
   /// size for the Portal widget size.
   final List<Widget> trailing;
 
