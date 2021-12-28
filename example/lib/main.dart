@@ -71,6 +71,8 @@ class _MyHomePageState extends State<MyHomePage> {
                       {
                         'id': '61asasgasgsag6a',
                         'display': 'khaled',
+                        'search':
+                            'DJ Khaled khaled', //Optional string to search by, defaults to display
                         'full_name': 'DJ Khaled',
                         'style': TextStyle(color: Colors.purple),
                         'photo':

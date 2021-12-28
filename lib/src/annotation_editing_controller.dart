@@ -7,10 +7,16 @@ class AnnotationEditingController extends TextEditingController {
   String? _pattern;
 
   // Generate the Regex pattern for matching all the suggestions in one.
-  AnnotationEditingController(this._mapping)
-      : _pattern = _mapping.keys.isNotEmpty
-            ? "(${_mapping.keys.map((key) => RegExp.escape(key)).join('|')})"
-            : null;
+  AnnotationEditingController(this._mapping) {
+    _pattern = null;
+
+    if (_mapping.keys.isNotEmpty) {
+      var result = _mapping.keys.map((key) => RegExp.escape(key)).toList();
+      result.sort((b, a) => a.toLowerCase().compareTo(b.toLowerCase()));
+      var finalresult = result.join('|');
+      _pattern = '($finalresult)(?![A-Za-z0-9_])';
+    }
+  }
 
   /// Can be used to get the markup from the controller directly.
   String get markupText {
@@ -51,11 +57,15 @@ class AnnotationEditingController extends TextEditingController {
   set mapping(Map<String, Annotation> _mapping) {
     this._mapping = _mapping;
 
-    _pattern = "(${_mapping.keys.map((key) => RegExp.escape(key)).join('|')})";
+    var result = _mapping.keys.map((key) => RegExp.escape(key)).toList();
+    result.sort((b, a) => a.toLowerCase().compareTo(b.toLowerCase()));
+    var finalresult = result.join('|');
+    _pattern = '($finalresult)(?![A-Za-z0-9_])';
   }
 
   @override
-  TextSpan buildTextSpan({BuildContext? context, TextStyle? style, bool? withComposing}) {
+  TextSpan buildTextSpan(
+      {BuildContext? context, TextStyle? style, bool? withComposing}) {
     var children = <InlineSpan>[];
 
     if (_pattern == null || _pattern == '()') {
