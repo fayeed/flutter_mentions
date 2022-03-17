@@ -46,6 +46,7 @@ class FlutterMentions extends StatefulWidget {
     this.buildCounter,
     this.scrollPhysics,
     this.scrollController,
+    this.controller,
     this.autofillHints,
     this.appendSpaceOnAdd = true,
     this.hideSuggestionList = false,
@@ -237,25 +238,18 @@ class FlutterMentions extends StatefulWidget {
   /// {@macro flutter.widgets.editableText.scrollController}
   final ScrollController? scrollController;
 
+  /// AnnotationEditingController for the text of the widget.
+  final AnnotationEditingController? controller;
+
   /// {@macro flutter.widgets.editableText.autofillHints}
   /// {@macro flutter.services.autofill.autofillHints}
   final Iterable<String>? autofillHints;
 
-  @override
-  FlutterMentionsState createState() => FlutterMentionsState();
-}
-
-class FlutterMentionsState extends State<FlutterMentions> {
-  AnnotationEditingController? controller;
-  ValueNotifier<bool> showSuggestions = ValueNotifier(false);
-  LengthMap? _selectedMention;
-  String _pattern = '';
-
-  Map<String, Annotation> mapToAnotation() {
+  static Map<String, Annotation> mapToAnotation(List<Mention> mentions) {
     final data = <String, Annotation>{};
 
     // Loop over all the mention items and generate a suggestions matching list
-    widget.mentions.forEach((element) {
+    mentions.forEach((element) {
       // if matchAll is set to true add a general regex patteren to match with
       if (element.matchAll) {
         data['${element.trigger}([A-Za-z0-9])*'] = Annotation(
@@ -270,27 +264,36 @@ class FlutterMentionsState extends State<FlutterMentions> {
 
       element.data.forEach(
         (e) => data["${element.trigger}${e['display']}"] = e['style'] != null
-            ? Annotation(
-                style: e['style'],
-                id: e['id'],
-                display: e['display'],
-                trigger: element.trigger,
-                disableMarkup: element.disableMarkup,
-                markupBuilder: element.markupBuilder,
-              )
-            : Annotation(
-                style: element.style,
-                id: e['id'],
-                display: e['display'],
-                trigger: element.trigger,
-                disableMarkup: element.disableMarkup,
-                markupBuilder: element.markupBuilder,
-              ),
+          ? Annotation(
+            style: e['style'],
+            id: e['id'],
+            display: e['display'],
+            trigger: element.trigger,
+            disableMarkup: element.disableMarkup,
+            markupBuilder: element.markupBuilder,
+          ) : Annotation(
+            style: element.style,
+            id: e['id'],
+            display: e['display'],
+            trigger: element.trigger,
+            disableMarkup: element.disableMarkup,
+            markupBuilder: element.markupBuilder,
+          ),
       );
     });
 
     return data;
   }
+
+  @override
+  FlutterMentionsState createState() => FlutterMentionsState();
+}
+
+class FlutterMentionsState extends State<FlutterMentions> {
+  AnnotationEditingController? controller;
+  ValueNotifier<bool> showSuggestions = ValueNotifier(false);
+  LengthMap? _selectedMention;
+  String _pattern = '';
 
   void addMention(Map<String, dynamic> value, [Mention? list]) {
     final selectedMention = _selectedMention!;
@@ -372,9 +375,9 @@ class FlutterMentionsState extends State<FlutterMentions> {
 
   @override
   void initState() {
-    final data = mapToAnotation();
+    final data = FlutterMentions.mapToAnotation(widget.mentions);
 
-    controller = AnnotationEditingController(data);
+    controller = widget.controller ?? AnnotationEditingController(data);
 
     if (widget.defaultText != null) {
       controller!.text = widget.defaultText!;
@@ -400,7 +403,7 @@ class FlutterMentionsState extends State<FlutterMentions> {
   void didUpdateWidget(widget) {
     super.didUpdateWidget(widget);
 
-    controller!.mapping = mapToAnotation();
+    controller!.mapping = FlutterMentions.mapToAnotation(widget.mentions);
   }
 
   @override
