@@ -7,6 +7,7 @@ class OptionList extends StatelessWidget {
     required this.suggestionListHeight,
     this.suggestionBuilder,
     this.suggestionListDecoration,
+    this.suggestionScrollController,
   });
 
   final Widget Function(Map<String, dynamic>)? suggestionBuilder;
@@ -19,6 +20,8 @@ class OptionList extends StatelessWidget {
 
   final BoxDecoration? suggestionListDecoration;
 
+  final ScrollController? suggestionScrollController;
+
   @override
   Widget build(BuildContext context) {
     return data.isNotEmpty
@@ -30,6 +33,7 @@ class OptionList extends StatelessWidget {
               minHeight: 0,
             ),
             child: ListView.builder(
+              controller: suggestionScrollController,
               itemCount: data.length,
               shrinkWrap: true,
               itemBuilder: (context, index) {

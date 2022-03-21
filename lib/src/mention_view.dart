@@ -7,6 +7,7 @@ class FlutterMentions extends StatefulWidget {
     this.defaultText,
     this.suggestionPosition = SuggestionPosition.Bottom,
     this.suggestionListHeight = 300.0,
+    this.suggestionScrollController,
     this.onMarkupChanged,
     this.onMentionAdd,
     this.onSearchChanged,
@@ -83,6 +84,9 @@ class FlutterMentions extends StatefulWidget {
   ///
   /// Defaults to `300.0`
   final double suggestionListHeight;
+
+  /// {@macro flutter.widgets.ListView.scrollController}
+  final ScrollController? suggestionScrollController;
 
   /// A Functioned which is triggered when ever the input changes
   /// but with the markup of the selected mentions
@@ -427,6 +431,7 @@ class FlutterMentionsState extends State<FlutterMentions> {
                     suggestionListHeight: widget.suggestionListHeight,
                     suggestionBuilder: list.suggestionBuilder,
                     suggestionListDecoration: widget.suggestionListDecoration,
+                    suggestionScrollController: widget.suggestionScrollController,
                     data: list.data.where((element) {
                       final ele = element['display'].toLowerCase();
                       final str = _selectedMention!.str
