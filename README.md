@@ -110,7 +110,7 @@ FlutterMentions(
           "id": "61asasgasgsag6a",
           "display": "khaled",
           "photo": "https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg",
-          style: TextStyle(color: Colors.green),
+          "style": TextStyle(color: Colors.green),
         },
       ],
     )
