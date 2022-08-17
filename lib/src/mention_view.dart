@@ -13,6 +13,7 @@ class FlutterMentions extends StatefulWidget {
     this.leading = const [],
     this.trailing = const [],
     this.suggestionListDecoration,
+    this.suggestionListMargin,
     this.focusNode,
     this.decoration = const InputDecoration(),
     this.keyboardType,
@@ -71,6 +72,7 @@ class FlutterMentions extends StatefulWidget {
   /// size for the Portal widget size.
   final List<Widget> trailing;
 
+  final EdgeInsets? suggestionListMargin;
   /// Suggestion modal position, can be alligned to top or bottom.
   ///
   /// Defaults to [SuggestionPosition.Bottom].
@@ -269,23 +271,23 @@ class FlutterMentionsState extends State<FlutterMentions> {
       }
 
       element.data.forEach(
-        (e) => data["${element.trigger}${e['display']}"] = e['style'] != null
+            (e) => data["${element.trigger}${e['display']}"] = e['style'] != null
             ? Annotation(
-                style: e['style'],
-                id: e['id'],
-                display: e['display'],
-                trigger: element.trigger,
-                disableMarkup: element.disableMarkup,
-                markupBuilder: element.markupBuilder,
-              )
+          style: e['style'],
+          id: e['id'],
+          display: e['display'],
+          trigger: element.trigger,
+          disableMarkup: element.disableMarkup,
+          markupBuilder: element.markupBuilder,
+        )
             : Annotation(
-                style: element.style,
-                id: e['id'],
-                display: e['display'],
-                trigger: element.trigger,
-                disableMarkup: element.disableMarkup,
-                markupBuilder: element.markupBuilder,
-              ),
+          style: element.style,
+          id: e['id'],
+          display: e['display'],
+          trigger: element.trigger,
+          disableMarkup: element.disableMarkup,
+          markupBuilder: element.markupBuilder,
+        ),
       );
     });
 
@@ -424,22 +426,23 @@ class FlutterMentionsState extends State<FlutterMentions> {
           builder: (BuildContext context, bool show, Widget? child) {
             return show && !widget.hideSuggestionList
                 ? OptionList(
-                    suggestionListHeight: widget.suggestionListHeight,
-                    suggestionBuilder: list.suggestionBuilder,
-                    suggestionListDecoration: widget.suggestionListDecoration,
-                    data: list.data.where((element) {
-                      final ele = element['display'].toLowerCase();
-                      final str = _selectedMention!.str
-                          .toLowerCase()
-                          .replaceAll(RegExp(_pattern), '');
+              suggestionListHeight: widget.suggestionListHeight,
+              suggestionBuilder: list.suggestionBuilder,
+              suggestionListDecoration: widget.suggestionListDecoration,
+              suggestionListMargin: widget.suggestionListMargin,
+              data: list.data.where((element) {
+                final ele = element['display'].toLowerCase();
+                final str = _selectedMention!.str
+                    .toLowerCase()
+                    .replaceAll(RegExp(_pattern), '');
 
-                      return ele == str ? false : ele.contains(str);
-                    }).toList(),
-                    onTap: (value) {
-                      addMention(value, list);
-                      showSuggestions.value = false;
-                    },
-                  )
+                return ele == str ? false : ele.contains(str);
+              }).toList(),
+              onTap: (value) {
+                addMention(value, list);
+                showSuggestions.value = false;
+              },
+            )
                 : Container();
           },
         ),
