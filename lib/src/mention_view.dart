@@ -269,23 +269,24 @@ class FlutterMentionsState extends State<FlutterMentions> {
       }
 
       element.data.forEach(
-        (e) => data["${element.trigger}${e['display']}"] = e['style'] != null
+            (e) =>
+        data["${element.trigger}${e['display']}"] = e['style'] != null
             ? Annotation(
-                style: e['style'],
-                id: e['id'],
-                display: e['display'],
-                trigger: element.trigger,
-                disableMarkup: element.disableMarkup,
-                markupBuilder: element.markupBuilder,
-              )
+          style: e['style'],
+          id: e['id'],
+          display: e['display'],
+          trigger: element.trigger,
+          disableMarkup: element.disableMarkup,
+          markupBuilder: element.markupBuilder,
+        )
             : Annotation(
-                style: element.style,
-                id: e['id'],
-                display: e['display'],
-                trigger: element.trigger,
-                disableMarkup: element.disableMarkup,
-                markupBuilder: element.markupBuilder,
-              ),
+          style: element.style,
+          id: e['id'],
+          display: e['display'],
+          trigger: element.trigger,
+          disableMarkup: element.disableMarkup,
+          markupBuilder: element.markupBuilder,
+        ),
       );
     });
 
@@ -306,7 +307,9 @@ class FlutterMentionsState extends State<FlutterMentions> {
     controller!.text = controller!.value.text.replaceRange(
       selectedMention.start,
       selectedMention.end,
-      "${_list.trigger}${value['display']}${widget.appendSpaceOnAdd ? ' ' : ''}",
+      "${_list.trigger}${value['display']}${widget.appendSpaceOnAdd
+          ? ' '
+          : ''}",
     );
 
     if (widget.onMentionAdd != null) widget.onMentionAdd!(value);
@@ -412,34 +415,39 @@ class FlutterMentionsState extends State<FlutterMentions> {
         : widget.mentions[0];
 
     return Container(
-      child: PortalEntry(
-        portalAnchor: widget.suggestionPosition == SuggestionPosition.Bottom
-            ? Alignment.topCenter
-            : Alignment.bottomCenter,
-        childAnchor: widget.suggestionPosition == SuggestionPosition.Bottom
-            ? Alignment.bottomCenter
-            : Alignment.topCenter,
-        portal: ValueListenableBuilder(
+      child: PortalTarget(
+        anchor: Aligned(
+          follower: widget.suggestionPosition == SuggestionPosition.Bottom
+              ? Alignment.topCenter
+              : Alignment.bottomCenter,
+          target: widget.suggestionPosition == SuggestionPosition.Bottom
+              ? Alignment.bottomCenter
+              : Alignment.topCenter,
+          alignToPortal: const AxisFlag(
+            x: true,
+          ),
+        ),
+        portalFollower: ValueListenableBuilder(
           valueListenable: showSuggestions,
           builder: (BuildContext context, bool show, Widget? child) {
             return show && !widget.hideSuggestionList
                 ? OptionList(
-                    suggestionListHeight: widget.suggestionListHeight,
-                    suggestionBuilder: list.suggestionBuilder,
-                    suggestionListDecoration: widget.suggestionListDecoration,
-                    data: list.data.where((element) {
-                      final ele = element['display'].toLowerCase();
-                      final str = _selectedMention!.str
-                          .toLowerCase()
-                          .replaceAll(RegExp(_pattern), '');
+              suggestionListHeight: widget.suggestionListHeight,
+              suggestionBuilder: list.suggestionBuilder,
+              suggestionListDecoration: widget.suggestionListDecoration,
+              data: list.data.where((element) {
+                final ele = element['display'].toLowerCase();
+                final str = _selectedMention!.str
+                    .toLowerCase()
+                    .replaceAll(RegExp(_pattern), '');
 
-                      return ele == str ? false : ele.contains(str);
-                    }).toList(),
-                    onTap: (value) {
-                      addMention(value, list);
-                      showSuggestions.value = false;
-                    },
-                  )
+                return ele == str ? false : ele.contains(str);
+              }).toList(),
+              onTap: (value) {
+                addMention(value, list);
+                showSuggestions.value = false;
+              },
+            )
                 : Container();
           },
         ),
