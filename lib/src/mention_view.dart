@@ -50,8 +50,9 @@ class FlutterMentions extends StatefulWidget {
     this.appendSpaceOnAdd = true,
     this.hideSuggestionList = false,
     this.onSuggestionVisibleChanged,
+    required this.annotationEditingController,
   }) : super(key: key);
-
+  final AnnotationEditingController annotationEditingController;
   final bool hideSuggestionList;
 
   /// default text for the Mention Input.
@@ -373,8 +374,8 @@ class FlutterMentionsState extends State<FlutterMentions> {
   @override
   void initState() {
     final data = mapToAnotation();
-
-    controller = AnnotationEditingController(data);
+    controller = widget.annotationEditingController;
+    controller!.initMapping(data);
 
     if (widget.defaultText != null) {
       controller!.text = widget.defaultText!;
