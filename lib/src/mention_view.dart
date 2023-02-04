@@ -13,6 +13,7 @@ class FlutterMentions extends StatefulWidget {
     this.leading = const [],
     this.trailing = const [],
     this.suggestionListDecoration,
+    this.suggestionListScrollController,
     this.focusNode,
     this.decoration = const InputDecoration(),
     this.keyboardType,
@@ -94,6 +95,9 @@ class FlutterMentions extends StatefulWidget {
 
   /// Decoration for the Suggestion list.
   final BoxDecoration? suggestionListDecoration;
+
+  // Control the scrolling of Suggestion list.
+  final ScrollController? suggestionListScrollController;
 
   /// Focus node for controlling the focus of the Input.
   final FocusNode? focusNode;
@@ -427,6 +431,8 @@ class FlutterMentionsState extends State<FlutterMentions> {
                     suggestionListHeight: widget.suggestionListHeight,
                     suggestionBuilder: list.suggestionBuilder,
                     suggestionListDecoration: widget.suggestionListDecoration,
+                    suggestionListScrollController:
+                        widget.suggestionListScrollController,
                     data: list.data.where((element) {
                       final ele = element['display'].toLowerCase();
                       final str = _selectedMention!.str
