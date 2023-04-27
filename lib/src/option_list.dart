@@ -8,9 +8,12 @@ class OptionList extends StatelessWidget {
     this.suggestionBuilder,
     this.suggestionListDecoration,
     this.suggestionListWidth,
+    this.suggestionContainerBuilder,
   });
 
-  final Widget Function(Map<String, dynamic>)? suggestionBuilder;
+  final Widget Function(Map<String, dynamic> mentionData,
+      Function(Map<String, dynamic>) onTap)? suggestionBuilder;
+  final Widget Function(Widget child)? suggestionContainerBuilder;
 
   final List<Map<String, dynamic>> data;
 
@@ -23,37 +26,38 @@ class OptionList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final child = ListView.builder(
+      itemCount: data.length,
+      shrinkWrap: true,
+      itemBuilder: (context, index) {
+        return suggestionBuilder != null
+            ? suggestionBuilder!(data[index], onTap)
+            : GestureDetector(
+                onTap: () => onTap(data[index]),
+                child: Container(
+                  color: Colors.blue,
+                  padding: EdgeInsets.all(20.0),
+                  child: Text(
+                    data[index]['display'],
+                    style: TextStyle(fontSize: 12),
+                  ),
+                ),
+              );
+      },
+    );
     return data.isNotEmpty
-        ? Container(
-            decoration:
-                suggestionListDecoration ?? BoxDecoration(color: Colors.white),
-            constraints: BoxConstraints(
-              maxHeight: suggestionListHeight,
-              minHeight: 0,
-              maxWidth: suggestionListWidth ?? double.infinity,
-            ),
-            child: ListView.builder(
-              itemCount: data.length,
-              shrinkWrap: true,
-              itemBuilder: (context, index) {
-                return GestureDetector(
-                  onTap: () {
-                    onTap(data[index]);
-                  },
-                  child: suggestionBuilder != null
-                      ? suggestionBuilder!(data[index])
-                      : Container(
-                          color: Colors.blue,
-                          padding: EdgeInsets.all(20.0),
-                          child: Text(
-                            data[index]['display'],
-                            style: TextStyle(fontSize: 12),
-                          ),
-                        ),
-                );
-              },
-            ),
-          )
+        ? suggestionContainerBuilder != null
+            ? suggestionContainerBuilder!(child)
+            : Container(
+                decoration: suggestionListDecoration ??
+                    BoxDecoration(color: Colors.white),
+                constraints: BoxConstraints(
+                  maxHeight: suggestionListHeight,
+                  minHeight: 0,
+                  maxWidth: suggestionListWidth ?? double.infinity,
+                ),
+                child: child,
+              )
         : Container();
   }
 }

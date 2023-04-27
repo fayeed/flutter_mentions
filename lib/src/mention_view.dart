@@ -52,6 +52,7 @@ class FlutterMentions extends StatefulWidget {
     this.onSuggestionVisibleChanged,
     this.suggestionListWidth,
     this.controller,
+    this.sugggestionContainerBuilder,
   }) : super(key: key);
 
   final bool hideSuggestionList;
@@ -246,7 +247,7 @@ class FlutterMentions extends StatefulWidget {
   final Iterable<String>? autofillHints;
 
   final AnnotationEditingController? controller;
-
+  final Widget Function(Widget child)? sugggestionContainerBuilder;
   @override
   FlutterMentionsState createState() => FlutterMentionsState();
 }
@@ -382,14 +383,16 @@ class FlutterMentionsState extends State<FlutterMentions> {
         : widget.mentions[0];
 
     return Container(
-      child: PortalEntry(
-        portalAnchor: widget.suggestionPosition == SuggestionPosition.Bottom
-            ? Alignment.topCenter
-            : Alignment.bottomCenter,
-        childAnchor: widget.suggestionPosition == SuggestionPosition.Bottom
-            ? Alignment.bottomCenter
-            : Alignment.topCenter,
-        portal: ValueListenableBuilder(
+      child: PortalTarget(
+        anchor: Aligned(
+          follower: widget.suggestionPosition == SuggestionPosition.Bottom
+              ? Alignment.topCenter
+              : Alignment.bottomCenter,
+          target: widget.suggestionPosition == SuggestionPosition.Bottom
+              ? Alignment.bottomCenter
+              : Alignment.topCenter,
+        ),
+        portalFollower: ValueListenableBuilder(
           valueListenable: showSuggestions,
           builder: (BuildContext context, bool show, Widget? child) {
             return show && !widget.hideSuggestionList
@@ -398,6 +401,8 @@ class FlutterMentionsState extends State<FlutterMentions> {
                     suggestionListWidth: widget.suggestionListWidth,
                     suggestionBuilder: list.suggestionBuilder,
                     suggestionListDecoration: widget.suggestionListDecoration,
+                    suggestionContainerBuilder:
+                        widget.sugggestionContainerBuilder,
                     data: list.data.where((element) {
                       final ele = element['display'].toLowerCase();
                       final str = _selectedMention!.str
