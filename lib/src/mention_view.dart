@@ -247,7 +247,8 @@ class FlutterMentions extends StatefulWidget {
   final Iterable<String>? autofillHints;
 
   final AnnotationEditingController? controller;
-  final Widget Function(Widget child)? sugggestionContainerBuilder;
+  final Widget Function(Widget child, BoxConstraints boxConstraints)?
+      sugggestionContainerBuilder;
   @override
   FlutterMentionsState createState() => FlutterMentionsState();
 }

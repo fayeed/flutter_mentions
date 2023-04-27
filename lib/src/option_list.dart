@@ -13,7 +13,8 @@ class OptionList extends StatelessWidget {
 
   final Widget Function(Map<String, dynamic> mentionData,
       Function(Map<String, dynamic>) onTap)? suggestionBuilder;
-  final Widget Function(Widget child)? suggestionContainerBuilder;
+  final Widget Function(Widget child, BoxConstraints boxConstraints)?
+      suggestionContainerBuilder;
 
   final List<Map<String, dynamic>> data;
 
@@ -26,6 +27,11 @@ class OptionList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final boxConstraints = BoxConstraints(
+      maxHeight: suggestionListHeight,
+      minHeight: 0,
+      maxWidth: suggestionListWidth ?? double.infinity,
+    );
     final child = ListView.builder(
       itemCount: data.length,
       shrinkWrap: true,
@@ -47,15 +53,11 @@ class OptionList extends StatelessWidget {
     );
     return data.isNotEmpty
         ? suggestionContainerBuilder != null
-            ? suggestionContainerBuilder!(child)
+            ? suggestionContainerBuilder!(child, boxConstraints)
             : Container(
                 decoration: suggestionListDecoration ??
                     BoxDecoration(color: Colors.white),
-                constraints: BoxConstraints(
-                  maxHeight: suggestionListHeight,
-                  minHeight: 0,
-                  maxWidth: suggestionListWidth ?? double.infinity,
-                ),
+                constraints: boxConstraints,
                 child: child,
               )
         : Container();
