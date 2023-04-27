@@ -10,3 +10,4 @@ part 'src/annotation_editing_controller.dart';
 part 'src/mention_view.dart';
 part 'src/models.dart';
 part 'src/option_list.dart';
+part 'src/mentions_to_annotations_converter.dart';

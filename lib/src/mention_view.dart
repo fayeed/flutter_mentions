@@ -50,6 +50,8 @@ class FlutterMentions extends StatefulWidget {
     this.appendSpaceOnAdd = true,
     this.hideSuggestionList = false,
     this.onSuggestionVisibleChanged,
+    this.suggestionListWidth,
+    this.controller,
   }) : super(key: key);
 
   final bool hideSuggestionList;
@@ -83,6 +85,8 @@ class FlutterMentions extends StatefulWidget {
   ///
   /// Defaults to `300.0`
   final double suggestionListHeight;
+
+  final double? suggestionListWidth;
 
   /// A Functioned which is triggered when ever the input changes
   /// but with the markup of the selected mentions
@@ -241,6 +245,8 @@ class FlutterMentions extends StatefulWidget {
   /// {@macro flutter.services.autofill.autofillHints}
   final Iterable<String>? autofillHints;
 
+  final AnnotationEditingController? controller;
+
   @override
   FlutterMentionsState createState() => FlutterMentionsState();
 }
@@ -250,47 +256,6 @@ class FlutterMentionsState extends State<FlutterMentions> {
   ValueNotifier<bool> showSuggestions = ValueNotifier(false);
   LengthMap? _selectedMention;
   String _pattern = '';
-
-  Map<String, Annotation> mapToAnotation() {
-    final data = <String, Annotation>{};
-
-    // Loop over all the mention items and generate a suggestions matching list
-    widget.mentions.forEach((element) {
-      // if matchAll is set to true add a general regex patteren to match with
-      if (element.matchAll) {
-        data['${element.trigger}([A-Za-z0-9])*'] = Annotation(
-          style: element.style,
-          id: null,
-          display: null,
-          trigger: element.trigger,
-          disableMarkup: element.disableMarkup,
-          markupBuilder: element.markupBuilder,
-        );
-      }
-
-      element.data.forEach(
-        (e) => data["${element.trigger}${e['display']}"] = e['style'] != null
-            ? Annotation(
-                style: e['style'],
-                id: e['id'],
-                display: e['display'],
-                trigger: element.trigger,
-                disableMarkup: element.disableMarkup,
-                markupBuilder: element.markupBuilder,
-              )
-            : Annotation(
-                style: element.style,
-                id: e['id'],
-                display: e['display'],
-                trigger: element.trigger,
-                disableMarkup: element.disableMarkup,
-                markupBuilder: element.markupBuilder,
-              ),
-      );
-    });
-
-    return data;
-  }
 
   void addMention(Map<String, dynamic> value, [Mention? list]) {
     final selectedMention = _selectedMention!;
@@ -372,9 +337,13 @@ class FlutterMentionsState extends State<FlutterMentions> {
 
   @override
   void initState() {
-    final data = mapToAnotation();
-
-    controller = AnnotationEditingController(data);
+    if (widget.controller == null) {
+      final data = MentionsToAnnotationsConverter.convert(widget.mentions);
+      print(data);
+      controller = AnnotationEditingController(data);
+    } else {
+      controller = widget.controller;
+    }
 
     if (widget.defaultText != null) {
       controller!.text = widget.defaultText!;
@@ -399,8 +368,9 @@ class FlutterMentionsState extends State<FlutterMentions> {
   @override
   void didUpdateWidget(widget) {
     super.didUpdateWidget(widget);
-
-    controller!.mapping = mapToAnotation();
+    controller ??= widget.controller;
+    controller!.mapping =
+        MentionsToAnnotationsConverter.convert(widget.mentions);
   }
 
   @override
@@ -425,6 +395,7 @@ class FlutterMentionsState extends State<FlutterMentions> {
             return show && !widget.hideSuggestionList
                 ? OptionList(
                     suggestionListHeight: widget.suggestionListHeight,
+                    suggestionListWidth: widget.suggestionListWidth,
                     suggestionBuilder: list.suggestionBuilder,
                     suggestionListDecoration: widget.suggestionListDecoration,
                     data: list.data.where((element) {
