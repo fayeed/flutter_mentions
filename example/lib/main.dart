@@ -41,7 +41,7 @@ class _MyHomePageState extends State<MyHomePage> {
       body: Column(
         mainAxisAlignment: MainAxisAlignment.end,
         children: <Widget>[
-          RaisedButton(
+          ElevatedButton(
             child: Text('Get Text'),
             onPressed: () {
               print(key.currentState!.controller!.markupText);
@@ -92,26 +92,31 @@ class _MyHomePageState extends State<MyHomePage> {
                       },
                     ],
                     matchAll: false,
-                    suggestionBuilder: (data) {
-                      return Container(
-                        padding: EdgeInsets.all(10.0),
-                        child: Row(
-                          children: <Widget>[
-                            CircleAvatar(
-                              backgroundImage: NetworkImage(
-                                data['photo'],
-                              ),
-                            ),
-                            SizedBox(
-                              width: 20.0,
-                            ),
-                            Column(
+                    suggestionBuilder: (data, onTap) {
+                      return Material(
+                        child: InkWell(
+                          onTap: () => onTap.call(data),
+                          child: Container(
+                            padding: EdgeInsets.all(10.0),
+                            child: Row(
                               children: <Widget>[
-                                Text(data['full_name']),
-                                Text('@${data['display']}'),
+                                CircleAvatar(
+                                  backgroundImage: NetworkImage(
+                                    data['photo'],
+                                  ),
+                                ),
+                                SizedBox(
+                                  width: 20.0,
+                                ),
+                                Column(
+                                  children: <Widget>[
+                                    Text(data['full_name']),
+                                    Text('@${data['display']}'),
+                                  ],
+                                )
                               ],
-                            )
-                          ],
+                            ),
+                          ),
                         ),
                       );
                     }),

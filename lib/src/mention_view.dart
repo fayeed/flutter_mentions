@@ -50,6 +50,9 @@ class FlutterMentions extends StatefulWidget {
     this.appendSpaceOnAdd = true,
     this.hideSuggestionList = false,
     this.onSuggestionVisibleChanged,
+    this.suggestionListWidth,
+    this.controller,
+    this.sugggestionContainerBuilder,
   }) : super(key: key);
 
   final bool hideSuggestionList;
@@ -83,6 +86,8 @@ class FlutterMentions extends StatefulWidget {
   ///
   /// Defaults to `300.0`
   final double suggestionListHeight;
+
+  final double? suggestionListWidth;
 
   /// A Functioned which is triggered when ever the input changes
   /// but with the markup of the selected mentions
@@ -204,7 +209,7 @@ class FlutterMentions extends StatefulWidget {
   ///
   /// This setting is only honored on iOS devices.
   ///
-  /// If unset, defaults to the brightness of [ThemeData.primaryColorBrightness].
+  /// If unset, defaults to the brightness of [ThemeData.brightness].].
   final Brightness? keyboardAppearance;
 
   /// {@macro flutter.widgets.editableText.scrollPadding}
@@ -241,6 +246,9 @@ class FlutterMentions extends StatefulWidget {
   /// {@macro flutter.services.autofill.autofillHints}
   final Iterable<String>? autofillHints;
 
+  final AnnotationEditingController? controller;
+  final Widget Function(Widget child, BoxConstraints boxConstraints)?
+      sugggestionContainerBuilder;
   @override
   FlutterMentionsState createState() => FlutterMentionsState();
 }
@@ -250,47 +258,6 @@ class FlutterMentionsState extends State<FlutterMentions> {
   ValueNotifier<bool> showSuggestions = ValueNotifier(false);
   LengthMap? _selectedMention;
   String _pattern = '';
-
-  Map<String, Annotation> mapToAnotation() {
-    final data = <String, Annotation>{};
-
-    // Loop over all the mention items and generate a suggestions matching list
-    widget.mentions.forEach((element) {
-      // if matchAll is set to true add a general regex patteren to match with
-      if (element.matchAll) {
-        data['${element.trigger}([A-Za-z0-9])*'] = Annotation(
-          style: element.style,
-          id: null,
-          display: null,
-          trigger: element.trigger,
-          disableMarkup: element.disableMarkup,
-          markupBuilder: element.markupBuilder,
-        );
-      }
-
-      element.data.forEach(
-        (e) => data["${element.trigger}${e['display']}"] = e['style'] != null
-            ? Annotation(
-                style: e['style'],
-                id: e['id'],
-                display: e['display'],
-                trigger: element.trigger,
-                disableMarkup: element.disableMarkup,
-                markupBuilder: element.markupBuilder,
-              )
-            : Annotation(
-                style: element.style,
-                id: e['id'],
-                display: e['display'],
-                trigger: element.trigger,
-                disableMarkup: element.disableMarkup,
-                markupBuilder: element.markupBuilder,
-              ),
-      );
-    });
-
-    return data;
-  }
 
   void addMention(Map<String, dynamic> value, [Mention? list]) {
     final selectedMention = _selectedMention!;
@@ -372,9 +339,13 @@ class FlutterMentionsState extends State<FlutterMentions> {
 
   @override
   void initState() {
-    final data = mapToAnotation();
-
-    controller = AnnotationEditingController(data);
+    if (widget.controller == null) {
+      final data = MentionsToAnnotationsConverter.convert(widget.mentions);
+      print(data);
+      controller = AnnotationEditingController(data);
+    } else {
+      controller = widget.controller;
+    }
 
     if (widget.defaultText != null) {
       controller!.text = widget.defaultText!;
@@ -399,8 +370,9 @@ class FlutterMentionsState extends State<FlutterMentions> {
   @override
   void didUpdateWidget(widget) {
     super.didUpdateWidget(widget);
-
-    controller!.mapping = mapToAnotation();
+    controller ??= widget.controller;
+    controller!.mapping =
+        MentionsToAnnotationsConverter.convert(widget.mentions);
   }
 
   @override
@@ -412,21 +384,26 @@ class FlutterMentionsState extends State<FlutterMentions> {
         : widget.mentions[0];
 
     return Container(
-      child: PortalEntry(
-        portalAnchor: widget.suggestionPosition == SuggestionPosition.Bottom
-            ? Alignment.topCenter
-            : Alignment.bottomCenter,
-        childAnchor: widget.suggestionPosition == SuggestionPosition.Bottom
-            ? Alignment.bottomCenter
-            : Alignment.topCenter,
-        portal: ValueListenableBuilder(
+      child: PortalTarget(
+        anchor: Aligned(
+          follower: widget.suggestionPosition == SuggestionPosition.Bottom
+              ? Alignment.topCenter
+              : Alignment.bottomCenter,
+          target: widget.suggestionPosition == SuggestionPosition.Bottom
+              ? Alignment.bottomCenter
+              : Alignment.topCenter,
+        ),
+        portalFollower: ValueListenableBuilder(
           valueListenable: showSuggestions,
           builder: (BuildContext context, bool show, Widget? child) {
             return show && !widget.hideSuggestionList
                 ? OptionList(
                     suggestionListHeight: widget.suggestionListHeight,
+                    suggestionListWidth: widget.suggestionListWidth,
                     suggestionBuilder: list.suggestionBuilder,
                     suggestionListDecoration: widget.suggestionListDecoration,
+                    suggestionContainerBuilder:
+                        widget.sugggestionContainerBuilder,
                     data: list.data.where((element) {
                       final ele = element['display'].toLowerCase();
                       final str = _selectedMention!.str
