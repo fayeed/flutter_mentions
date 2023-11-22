@@ -7,6 +7,7 @@ class FlutterMentions extends StatefulWidget {
     this.defaultText,
     this.suggestionPosition = SuggestionPosition.Bottom,
     this.suggestionListHeight = 300.0,
+    this.suggestionListWidth = double.infinity,
     this.onMarkupChanged,
     this.onMentionAdd,
     this.onSearchChanged,
@@ -83,6 +84,11 @@ class FlutterMentions extends StatefulWidget {
   ///
   /// Defaults to `300.0`
   final double suggestionListHeight;
+
+  /// Max width for the suggestion list
+  ///
+  /// Defaults to `double.infinity`
+  final double suggestionListWidth;
 
   /// A Functioned which is triggered when ever the input changes
   /// but with the markup of the selected mentions
@@ -425,6 +431,7 @@ class FlutterMentionsState extends State<FlutterMentions> {
             return show && !widget.hideSuggestionList
                 ? OptionList(
                     suggestionListHeight: widget.suggestionListHeight,
+                    suggestionListWidth: widget.suggestionListWidth,
                     suggestionBuilder: list.suggestionBuilder,
                     suggestionListDecoration: widget.suggestionListDecoration,
                     data: list.data.where((element) {

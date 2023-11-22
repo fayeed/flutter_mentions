@@ -5,6 +5,7 @@ class OptionList extends StatelessWidget {
     required this.data,
     required this.onTap,
     required this.suggestionListHeight,
+    required this.suggestionListWidth,
     this.suggestionBuilder,
     this.suggestionListDecoration,
   });
@@ -17,6 +18,8 @@ class OptionList extends StatelessWidget {
 
   final double suggestionListHeight;
 
+  final double suggestionListWidth;
+
   final BoxDecoration? suggestionListDecoration;
 
   @override
@@ -27,7 +30,9 @@ class OptionList extends StatelessWidget {
                 suggestionListDecoration ?? BoxDecoration(color: Colors.white),
             constraints: BoxConstraints(
               maxHeight: suggestionListHeight,
+              maxWidth: suggestionListWidth,
               minHeight: 0,
+              minWidth: 0
             ),
             child: ListView.builder(
               itemCount: data.length,
