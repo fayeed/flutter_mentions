@@ -6,7 +6,6 @@ class OptionList extends StatelessWidget {
     required this.onTap,
     required this.suggestionListHeight,
     required this.suggestionListWidth,
-    required this.suggestionListPadding,
     this.suggestionBuilder,
     this.suggestionListDecoration,
   });
@@ -21,44 +20,39 @@ class OptionList extends StatelessWidget {
 
   final double suggestionListWidth;
 
-  final EdgeInsets suggestionListPadding;
-
   final BoxDecoration? suggestionListDecoration;
 
   @override
   Widget build(BuildContext context) {
     return data.isNotEmpty
-        ? Padding(
-            padding: suggestionListPadding,
-            child: Container(
-              decoration: suggestionListDecoration ??
-                  BoxDecoration(color: Colors.white),
-              constraints: BoxConstraints(
-                  maxHeight: suggestionListHeight,
-                  maxWidth: suggestionListWidth,
-                  minHeight: 0,
-                  minWidth: 0),
-              child: ListView.builder(
-                itemCount: data.length,
-                shrinkWrap: true,
-                itemBuilder: (context, index) {
-                  return GestureDetector(
-                    onTap: () {
-                      onTap(data[index]);
-                    },
-                    child: suggestionBuilder != null
-                        ? suggestionBuilder!(data[index])
-                        : Container(
-                            color: Colors.blue,
-                            padding: EdgeInsets.all(20.0),
-                            child: Text(
-                              data[index]['display'],
-                              style: TextStyle(fontSize: 12),
-                            ),
+        ? Container(
+            decoration:
+                suggestionListDecoration ?? BoxDecoration(color: Colors.white),
+            constraints: BoxConstraints(
+                maxHeight: suggestionListHeight,
+                maxWidth: suggestionListWidth,
+                minHeight: 0,
+                minWidth: 0),
+            child: ListView.builder(
+              itemCount: data.length,
+              shrinkWrap: true,
+              itemBuilder: (context, index) {
+                return GestureDetector(
+                  onTap: () {
+                    onTap(data[index]);
+                  },
+                  child: suggestionBuilder != null
+                      ? suggestionBuilder!(data[index])
+                      : Container(
+                          color: Colors.blue,
+                          padding: EdgeInsets.all(20.0),
+                          child: Text(
+                            data[index]['display'],
+                            style: TextStyle(fontSize: 12),
                           ),
-                  );
-                },
-              ),
+                        ),
+                );
+              },
             ),
           )
         : Container();
