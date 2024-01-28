@@ -17,7 +17,7 @@ class AnnotationEditingController extends TextEditingController {
     final someVal = _mapping.isEmpty
         ? text
         : text.splitMapJoin(
-            RegExp('$_pattern'),
+            RegExp('$_pattern(\\w*)'),
             onMatch: (Match match) {
               final mention = _mapping[match[0]!] ??
                   _mapping[_mapping.keys.firstWhere((element) {
@@ -55,14 +55,15 @@ class AnnotationEditingController extends TextEditingController {
   }
 
   @override
-  TextSpan buildTextSpan({BuildContext? context, TextStyle? style, bool? withComposing}) {
+  TextSpan buildTextSpan(
+      {BuildContext? context, TextStyle? style, bool? withComposing}) {
     var children = <InlineSpan>[];
 
     if (_pattern == null || _pattern == '()') {
       children.add(TextSpan(text: text, style: style));
     } else {
       text.splitMapJoin(
-        RegExp('$_pattern'),
+        RegExp('$_pattern(\\w*)'),
         onMatch: (Match match) {
           if (_mapping.isNotEmpty) {
             final mention = _mapping[match[0]!] ??
