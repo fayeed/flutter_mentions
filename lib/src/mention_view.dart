@@ -248,6 +248,12 @@ class FlutterMentions extends StatefulWidget {
 class FlutterMentionsState extends State<FlutterMentions> {
   AnnotationEditingController? controller;
   LengthMap? _selectedMention;
+  set selectedMention(LengthMap? value) {
+    if (mounted && value != _selectedMention) {
+      setState(() => _selectedMention = value);
+    }
+  }
+
   late RegExp _patternRegexp;
 
   static final _whiteSpaceRegexp = RegExp(r'(\s)');
@@ -289,26 +295,28 @@ class FlutterMentionsState extends State<FlutterMentions> {
   }
 
   void addMention(MentionData value, Mention mention) {
-    final selectedMention = _selectedMention!;
-
-    setState(() {
-      _selectedMention = null;
-    });
+    final currSelectedMention = _selectedMention!;
+    selectedMention = null;
 
     // find the text by range and replace with the new value.
     controller!.text = controller!.value.text.replaceRange(
-      selectedMention.start,
-      selectedMention.end,
+      currSelectedMention.start,
+      currSelectedMention.end,
       "${mention.trigger}${value.display}${widget.appendSpaceOnAdd ? ' ' : ''}",
     );
 
     if (widget.onMentionAdd != null) widget.onMentionAdd!(value);
 
     // Move the cursor to next position after the new mentioned item.
-    var nextCursorPosition = selectedMention.start + 1 + value.display.length;
-    if (widget.appendSpaceOnAdd) nextCursorPosition++;
-    controller!.selection =
-        TextSelection.fromPosition(TextPosition(offset: nextCursorPosition));
+    var nextCursorPosition =
+        currSelectedMention.start + 1 + value.display.length;
+
+    if (widget.appendSpaceOnAdd) {
+      nextCursorPosition++;
+    }
+    controller!.selection = TextSelection.fromPosition(
+      TextPosition(offset: nextCursorPosition),
+    );
   }
 
   void suggestionListener() {
@@ -339,9 +347,7 @@ class FlutterMentionsState extends State<FlutterMentions> {
         widget.onSuggestionVisibleChanged!(show);
       }
 
-      setState(() {
-        _selectedMention = show ? lengthMap[val] : null;
-      });
+      selectedMention = show ? lengthMap[val] : null;
     }
   }
 
@@ -406,16 +412,18 @@ class FlutterMentionsState extends State<FlutterMentions> {
 
   @override
   Widget build(BuildContext context) {
+    final currSelectedMention = _selectedMention;
+
     final suggestionVisible =
-        _selectedMention != null && !widget.hideSuggestionList;
+        currSelectedMention != null && !widget.hideSuggestionList;
 
     final mention = suggestionVisible
         ? widget.mentions.firstWhere(
-            (element) => _selectedMention!.str.startsWith(element.trigger))
+            (element) => currSelectedMention.str.startsWith(element.trigger))
         : widget.mentions[0];
 
     final str = suggestionVisible
-        ? _selectedMention!.str.toLowerCase().replaceAll(_patternRegexp, '')
+        ? currSelectedMention.str.toLowerCase().replaceAll(_patternRegexp, '')
         : '';
 
     return PortalTarget(

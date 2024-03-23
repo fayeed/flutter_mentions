@@ -13,6 +13,18 @@ class LengthMap {
   final String str;
   final int start;
   final int end;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is LengthMap &&
+          runtimeType == other.runtimeType &&
+          str == other.str &&
+          start == other.start &&
+          end == other.end;
+
+  @override
+  int get hashCode => Object.hash(str, start, end);
 }
 
 @immutable
@@ -26,6 +38,18 @@ class MentionData {
   final String id;
   final String display;
   final TextStyle? style;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is MentionData &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          display == other.display &&
+          style == other.style;
+
+  @override
+  int get hashCode => Object.hash(id, display, style);
 }
 
 typedef SuggestionsBuilder<T extends MentionData> = Widget Function(T data);
@@ -72,6 +96,30 @@ class Mention<T extends MentionData> {
   /// Allows to set custom markup for the mentioned item.
   final String Function(String trigger, String mention, String value)?
       markupBuilder;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is Mention &&
+          runtimeType == other.runtimeType &&
+          trigger == other.trigger &&
+          data == other.data &&
+          style == other.style &&
+          matchAll == other.matchAll &&
+          disableMarkup == other.disableMarkup &&
+          _suggestionBuilder == other._suggestionBuilder &&
+          markupBuilder == other.markupBuilder;
+
+  @override
+  int get hashCode => Object.hash(
+        trigger,
+        data,
+        style,
+        matchAll,
+        disableMarkup,
+        _suggestionBuilder,
+        markupBuilder,
+      );
 }
 
 @immutable
@@ -92,4 +140,26 @@ class Annotation {
   final bool disableMarkup;
   final String Function(String trigger, String mention, String value)?
       markupBuilder;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is Annotation &&
+          runtimeType == other.runtimeType &&
+          style == other.style &&
+          id == other.id &&
+          display == other.display &&
+          trigger == other.trigger &&
+          disableMarkup == other.disableMarkup &&
+          markupBuilder == other.markupBuilder;
+
+  @override
+  int get hashCode => Object.hash(
+        style,
+        id,
+        display,
+        trigger,
+        disableMarkup,
+        markupBuilder,
+      );
 }
