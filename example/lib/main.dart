@@ -2,10 +2,26 @@ import 'package:flutter/material.dart';
 import 'package:flutter_mentions/flutter_mentions.dart';
 
 void main() {
-  runApp(MyApp());
+  runApp(const MyApp());
+}
+
+@immutable
+class CustomMentionData extends MentionData {
+  const CustomMentionData({
+    required super.id,
+    required super.display,
+    super.style,
+    required this.fullName,
+    required this.photo,
+  });
+
+  final String fullName;
+  final String photo;
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Portal(
@@ -15,19 +31,19 @@ class MyApp extends StatelessWidget {
           primarySwatch: Colors.blue,
           visualDensity: VisualDensity.adaptivePlatformDensity,
         ),
-        home: MyHomePage(title: 'Flutter Demo Home Page'),
+        home: const MyHomePage(title: 'Flutter Demo Home Page'),
       ),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
-  MyHomePage({Key? key, this.title}) : super(key: key);
+  const MyHomePage({Key? key, this.title}) : super(key: key);
 
   final String? title;
 
   @override
-  _MyHomePageState createState() => _MyHomePageState();
+  State<MyHomePage> createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> {
@@ -43,7 +59,7 @@ class _MyHomePageState extends State<MyHomePage> {
         mainAxisAlignment: MainAxisAlignment.end,
         children: <Widget>[
           ElevatedButton(
-            child: Text('Get Text'),
+            child: const Text('Get Text'),
             onPressed: () {
               print(key.currentState!.controller!.markupText);
             },
@@ -54,77 +70,76 @@ class _MyHomePageState extends State<MyHomePage> {
               suggestionPosition: SuggestionPosition.Top,
               maxLines: 5,
               minLines: 1,
-              decoration: InputDecoration(hintText: 'hello'),
+              decoration: const InputDecoration(hintText: 'hello'),
               mentions: [
-                Mention(
-                    trigger: '@',
-                    style: TextStyle(
-                      color: Colors.amber,
+                Mention<CustomMentionData>(
+                  trigger: '@',
+                  style: const TextStyle(
+                    color: Colors.amber,
+                  ),
+                  data: const [
+                    CustomMentionData(
+                      id: '61as61fsa',
+                      display: 'fayeedP',
+                      fullName: 'Fayeed Pawaskar',
+                      photo:
+                          'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940',
                     ),
-                    data: [
-                      {
-                        'id': '61as61fsa',
-                        'display': 'fayeedP',
-                        'full_name': 'Fayeed Pawaskar',
-                        'photo':
-                            'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940'
-                      },
-                      {
-                        'id': '61asasgasgsag6a',
-                        'display': 'khaled',
-                        'full_name': 'DJ Khaled',
-                        'style': TextStyle(color: Colors.purple),
-                        'photo':
-                            'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940'
-                      },
-                      {
-                        'id': 'asfgasga41',
-                        'display': 'markT',
-                        'full_name': 'Mark Twain',
-                        'photo':
-                            'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940'
-                      },
-                      {
-                        'id': 'asfsaf451a',
-                        'display': 'JhonL',
-                        'full_name': 'Jhon Legend',
-                        'photo':
-                            'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940'
-                      },
-                    ],
-                    matchAll: false,
-                    suggestionBuilder: (data) {
-                      return Container(
-                        padding: EdgeInsets.all(10.0),
-                        child: Row(
-                          children: <Widget>[
-                            CircleAvatar(
-                              backgroundImage: NetworkImage(
-                                data['photo'],
-                              ),
-                            ),
-                            SizedBox(
-                              width: 20.0,
-                            ),
-                            Column(
-                              children: <Widget>[
-                                Text(data['full_name']),
-                                Text('@${data['display']}'),
-                              ],
-                            )
-                          ],
-                        ),
-                      );
-                    }),
-                Mention(
+                    CustomMentionData(
+                      id: '61asasgasgsag6a',
+                      display: 'khaled',
+                      fullName: 'DJ Khaled',
+                      style: TextStyle(color: Colors.purple),
+                      photo:
+                          'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940',
+                    ),
+                    CustomMentionData(
+                      id: 'asfgasga41',
+                      display: 'markT',
+                      fullName: 'Mark Twain',
+                      photo:
+                          'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940',
+                    ),
+                    CustomMentionData(
+                      id: 'asfsaf451a',
+                      display: 'JhonL',
+                      fullName: 'Jhon Legend',
+                      photo:
+                          'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940',
+                    ),
+                  ],
+                  matchAll: false,
+                  suggestionBuilder: (CustomMentionData data) {
+                    return Container(
+                      padding: const EdgeInsets.all(10.0),
+                      child: Row(
+                        children: <Widget>[
+                          CircleAvatar(
+                            backgroundImage: NetworkImage(data.photo),
+                          ),
+                          const SizedBox(
+                            width: 20.0,
+                          ),
+                          Column(
+                            children: <Widget>[
+                              Text(data.fullName),
+                              Text('@${data.display}'),
+                            ],
+                          )
+                        ],
+                      ),
+                    );
+                  },
+                ),
+                const Mention(
                   trigger: '#',
                   disableMarkup: true,
                   style: TextStyle(
                     color: Colors.blue,
                   ),
                   data: [
-                    {'id': 'reactjs', 'display': 'reactjs'},
-                    {'id': 'javascript', 'display': 'javascript'},
+                    MentionData(id: 'reactjs', display: 'reactjs'),
+                    MentionData(id: 'javascript', display: 'javascript'),
                   ],
                   matchAll: true,
                 )

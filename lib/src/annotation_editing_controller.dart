@@ -4,20 +4,22 @@ part of flutter_mentions;
 /// trigger based mentions.
 class AnnotationEditingController extends TextEditingController {
   Map<String, Annotation> _mapping;
-  String? _pattern;
+  RegExp _patternRegexp;
 
   // Generate the Regex pattern for matching all the suggestions in one.
   AnnotationEditingController(this._mapping)
-      : _pattern = _mapping.keys.isNotEmpty
-            ? "(${_mapping.keys.map((key) => RegExp.escape(key)).join('|')})"
-            : null;
+      : _patternRegexp = RegExp(_mappingToPattern(_mapping));
+
+  static String _mappingToPattern(Map<String, Annotation> mapping) {
+    return "(${mapping.keys.map(RegExp.escape).join('|')})";
+  }
 
   /// Can be used to get the markup from the controller directly.
   String get markupText {
     final someVal = _mapping.isEmpty
         ? text
         : text.splitMapJoin(
-            RegExp('$_pattern'),
+            _patternRegexp,
             onMatch: (Match match) {
               final mention = _mapping[match[0]!] ??
                   _mapping[_mapping.keys.firstWhere((element) {
@@ -51,18 +53,22 @@ class AnnotationEditingController extends TextEditingController {
   set mapping(Map<String, Annotation> _mapping) {
     this._mapping = _mapping;
 
-    _pattern = "(${_mapping.keys.map((key) => RegExp.escape(key)).join('|')})";
+    final pattern = _mappingToPattern(_mapping);
+    if (pattern != _patternRegexp.pattern) {
+      _patternRegexp = RegExp(pattern);
+    }
   }
 
   @override
-  TextSpan buildTextSpan({BuildContext? context, TextStyle? style, bool? withComposing}) {
+  TextSpan buildTextSpan(
+      {BuildContext? context, TextStyle? style, bool? withComposing}) {
     var children = <InlineSpan>[];
 
-    if (_pattern == null || _pattern == '()') {
+    if (mapping.isEmpty) {
       children.add(TextSpan(text: text, style: style));
     } else {
       text.splitMapJoin(
-        RegExp('$_pattern'),
+        _patternRegexp,
         onMatch: (Match match) {
           if (_mapping.isNotEmpty) {
             final mention = _mapping[match[0]!] ??

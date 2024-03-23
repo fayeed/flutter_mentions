@@ -2,38 +2,52 @@ part of flutter_mentions;
 
 enum SuggestionPosition { Top, Bottom }
 
+@immutable
 class LengthMap {
-  LengthMap({
+  const LengthMap({
     required this.start,
     required this.end,
     required this.str,
   });
 
-  String str;
-  int start;
-  int end;
+  final String str;
+  final int start;
+  final int end;
 }
 
-class Mention {
-  Mention({
+@immutable
+class MentionData {
+  const MentionData({
+    required this.id,
+    required this.display,
+    this.style,
+  });
+
+  final String id;
+  final String display;
+  final TextStyle? style;
+}
+
+typedef SuggestionsBuilder<T extends MentionData> = Widget Function(T data);
+
+@immutable
+class Mention<T extends MentionData> {
+  const Mention({
     required this.trigger,
     this.data = const [],
     this.style,
     this.matchAll = false,
-    this.suggestionBuilder,
+    Widget Function(T)? suggestionBuilder,
     this.disableMarkup = false,
     this.markupBuilder,
-  });
+  }) : _suggestionBuilder = suggestionBuilder;
 
   /// A single character that will be used to trigger the suggestions.
   final String trigger;
 
-  /// List of Map to represent the suggestions shown to the user
-  ///
-  /// You need to provide two properties `id` & `display` both are [String]
-  /// You can also have any custom properties as you like to build custom suggestion
-  /// widget.
-  final List<Map<String, dynamic>> data;
+  /// List of [MentionData] or it's subclass to represent the suggestions shown
+  /// to the user
+  final List<T> data;
 
   /// Style for the mention item in Input.
   final TextStyle? style;
@@ -45,15 +59,24 @@ class Mention {
   final bool disableMarkup;
 
   /// Build Custom suggestion widget using this builder.
-  final Widget Function(Map<String, dynamic>)? suggestionBuilder;
+  final Widget Function(T)? _suggestionBuilder;
+
+  bool get hasSuggestionBuilder => _suggestionBuilder != null;
+
+  // https://github.com/dart-lang/sdk/issues/55286
+  Widget suggestionBuilder(MentionData value) {
+    assert(hasSuggestionBuilder);
+    return _suggestionBuilder!(value as T);
+  }
 
   /// Allows to set custom markup for the mentioned item.
   final String Function(String trigger, String mention, String value)?
       markupBuilder;
 }
 
+@immutable
 class Annotation {
-  Annotation({
+  const Annotation({
     required this.trigger,
     this.style,
     this.id,
@@ -62,11 +85,11 @@ class Annotation {
     this.markupBuilder,
   });
 
-  TextStyle? style;
-  String? id;
-  String? display;
-  String trigger;
-  bool disableMarkup;
+  final TextStyle? style;
+  final String? id;
+  final String? display;
+  final String trigger;
+  final bool disableMarkup;
   final String Function(String trigger, String mention, String value)?
       markupBuilder;
 }

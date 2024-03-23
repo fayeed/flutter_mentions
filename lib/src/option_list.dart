@@ -9,11 +9,11 @@ class OptionList extends StatelessWidget {
     this.suggestionListDecoration,
   });
 
-  final Widget Function(Map<String, dynamic>)? suggestionBuilder;
+  final Widget Function(MentionData)? suggestionBuilder;
 
-  final List<Map<String, dynamic>> data;
+  final List<MentionData> data;
 
-  final Function(Map<String, dynamic>) onTap;
+  final Function(MentionData) onTap;
 
   final double suggestionListHeight;
 
@@ -33,17 +33,20 @@ class OptionList extends StatelessWidget {
               itemCount: data.length,
               shrinkWrap: true,
               itemBuilder: (context, index) {
+                final currentData = data[index];
+
                 return GestureDetector(
+                  behavior: HitTestBehavior.translucent,
                   onTap: () {
-                    onTap(data[index]);
+                    onTap(currentData);
                   },
                   child: suggestionBuilder != null
-                      ? suggestionBuilder!(data[index])
+                      ? suggestionBuilder!(currentData)
                       : Container(
                           color: Colors.blue,
                           padding: EdgeInsets.all(20.0),
                           child: Text(
-                            data[index]['display'],
+                            currentData.display,
                             style: TextStyle(fontSize: 12),
                           ),
                         ),
