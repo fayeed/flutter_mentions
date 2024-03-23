@@ -269,6 +269,7 @@ class FlutterMentionsState extends State<FlutterMentions> {
         if (element.matchAll) {
           data['${element.trigger}([A-Za-z0-9])*'] = Annotation(
             style: element.style,
+            matchAll: true,
             id: null,
             display: null,
             trigger: element.trigger,
@@ -282,6 +283,7 @@ class FlutterMentionsState extends State<FlutterMentions> {
             .forEach(
               (e) => data['${element.trigger}${e.display}'] = Annotation(
                 style: e.style ?? element.style,
+                matchAll: false,
                 id: e.id,
                 display: e.display,
                 trigger: element.trigger,

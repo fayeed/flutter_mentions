@@ -127,6 +127,7 @@ class Annotation {
   const Annotation({
     required this.trigger,
     this.style,
+    required this.matchAll,
     this.id,
     this.display,
     this.disableMarkup = false,
@@ -134,6 +135,7 @@ class Annotation {
   });
 
   final TextStyle? style;
+  final bool matchAll;
   final String? id;
   final String? display;
   final String trigger;
@@ -147,6 +149,7 @@ class Annotation {
       other is Annotation &&
           runtimeType == other.runtimeType &&
           style == other.style &&
+          matchAll == other.matchAll &&
           id == other.id &&
           display == other.display &&
           trigger == other.trigger &&
@@ -156,6 +159,7 @@ class Annotation {
   @override
   int get hashCode => Object.hash(
         style,
+        matchAll,
         id,
         display,
         trigger,

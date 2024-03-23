@@ -11,7 +11,7 @@ class AnnotationEditingController extends TextEditingController {
       : _regExp = RegExp(_mappingToPattern(_mapping));
 
   static String _mappingToPattern(Map<String, Annotation> mapping) {
-    return "(${mapping.keys.map(RegExp.escape).join('|')})";
+    return "(${mapping.entries.map((e) => e.value.matchAll ? e.key : RegExp.escape(e.key)).join('|')})";
   }
 
   /// Can be used to get the markup from the controller directly.
@@ -21,21 +21,26 @@ class AnnotationEditingController extends TextEditingController {
         : text.splitMapJoin(
             _regExp,
             onMatch: (Match match) {
-              final mention = _mapping[match[0]!] ??
+              final val = match[0]!;
+
+              final mention = _mapping[val] ??
                   _mapping[_mapping.keys.firstWhere((element) {
                     final reg = RegExp(element);
 
-                    return reg.hasMatch(match[0]!);
+                    return reg.hasMatch(val);
                   })]!;
 
               // Default markup format for mentions
               if (!mention.disableMarkup) {
                 return mention.markupBuilder != null
                     ? mention.markupBuilder!(
-                        mention.trigger, mention.id!, mention.display!)
-                    : '${mention.trigger}[__${mention.id}__](__${mention.display}__)';
+                        mention.trigger,
+                        mention.id ?? val,
+                        mention.display ?? val,
+                      )
+                    : '${mention.trigger}[__${mention.id ?? val}__](__${mention.display ?? val}__)';
               } else {
-                return match[0]!;
+                return val;
               }
             },
             onNonMatch: (String text) {
@@ -71,16 +76,18 @@ class AnnotationEditingController extends TextEditingController {
         _regExp,
         onMatch: (Match match) {
           if (_mapping.isNotEmpty) {
-            final mention = _mapping[match[0]!] ??
+            final val = match[0]!;
+
+            final mention = _mapping[val] ??
                 _mapping[_mapping.keys.firstWhere((element) {
                   final reg = RegExp(element);
 
-                  return reg.hasMatch(match[0]!);
+                  return reg.hasMatch(val);
                 })]!;
 
             children.add(
               TextSpan(
-                text: match[0],
+                text: val,
                 style: style!.merge(mention.style),
               ),
             );
