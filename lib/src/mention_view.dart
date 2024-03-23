@@ -255,39 +255,35 @@ class FlutterMentionsState extends State<FlutterMentions> {
     final data = <String, Annotation>{};
 
     // Loop over all the mention items and generate a suggestions matching list
-    widget.mentions.forEach((element) {
-      // if matchAll is set to true add a general regex patteren to match with
-      if (element.matchAll) {
-        data['${element.trigger}([A-Za-z0-9])*'] = Annotation(
-          style: element.style,
-          id: null,
-          display: null,
-          trigger: element.trigger,
-          disableMarkup: element.disableMarkup,
-          markupBuilder: element.markupBuilder,
-        );
-      }
+    widget.mentions.forEach(
+      (element) {
+        // if matchAll is set to true add a general regex patteren to match with
+        if (element.matchAll) {
+          data['${element.trigger}([A-Za-z0-9])*'] = Annotation(
+            style: element.style,
+            id: null,
+            display: null,
+            trigger: element.trigger,
+            disableMarkup: element.disableMarkup,
+            markupBuilder: element.markupBuilder,
+          );
+        }
 
-      element.data.forEach(
-        (e) => data["${element.trigger}${e['display']}"] = e['style'] != null
-            ? Annotation(
-                style: e['style'],
-                id: e['id'],
-                display: e['display'],
-                trigger: element.trigger,
-                disableMarkup: element.disableMarkup,
-                markupBuilder: element.markupBuilder,
-              )
-            : Annotation(
-                style: element.style,
+        element.data
+            .sorted((a, b) =>
+                (b['display']?.length ?? 0) - (a['display']?.length ?? 0))
+            .forEach(
+              (e) => data["${element.trigger}${e['display']}"] = Annotation(
+                style: e['style'] ?? element.style,
                 id: e['id'],
                 display: e['display'],
                 trigger: element.trigger,
                 disableMarkup: element.disableMarkup,
                 markupBuilder: element.markupBuilder,
               ),
-      );
-    });
+            );
+      },
+    );
 
     return data;
   }
@@ -342,14 +338,16 @@ class FlutterMentionsState extends State<FlutterMentions> {
             element.str.toLowerCase().contains(RegExp(_pattern));
       });
 
-      showSuggestions.value = val != -1;
+      final show = val != -1;
+
+      showSuggestions.value = show;
 
       if (widget.onSuggestionVisibleChanged != null) {
-        widget.onSuggestionVisibleChanged!(val != -1);
+        widget.onSuggestionVisibleChanged!(show);
       }
 
       setState(() {
-        _selectedMention = val == -1 ? null : lengthMap[val];
+        _selectedMention = show ? lengthMap[val] : null;
       });
     }
   }
@@ -412,14 +410,17 @@ class FlutterMentionsState extends State<FlutterMentions> {
         : widget.mentions[0];
 
     return Container(
-      child: PortalEntry(
-        portalAnchor: widget.suggestionPosition == SuggestionPosition.Bottom
-            ? Alignment.topCenter
-            : Alignment.bottomCenter,
-        childAnchor: widget.suggestionPosition == SuggestionPosition.Bottom
-            ? Alignment.bottomCenter
-            : Alignment.topCenter,
-        portal: ValueListenableBuilder(
+      child: PortalTarget(
+        anchor: Aligned(
+          follower: widget.suggestionPosition == SuggestionPosition.Bottom
+              ? Alignment.topCenter
+              : Alignment.bottomCenter,
+          target: widget.suggestionPosition == SuggestionPosition.Bottom
+              ? Alignment.bottomCenter
+              : Alignment.topCenter,
+          alignToPortal: const AxisFlag(x: true),
+        ),
+        portalFollower: ValueListenableBuilder(
           valueListenable: showSuggestions,
           builder: (BuildContext context, bool show, Widget? child) {
             return show && !widget.hideSuggestionList
