@@ -248,13 +248,14 @@ class FlutterMentions extends StatefulWidget {
 class FlutterMentionsState extends State<FlutterMentions> {
   AnnotationEditingController? controller;
   LengthMap? _selectedMention;
+
   set selectedMention(LengthMap? value) {
     if (mounted && value != _selectedMention) {
       setState(() => _selectedMention = value);
     }
   }
 
-  late RegExp _patternRegexp;
+  late RegExp _regExp;
 
   static final _whiteSpaceRegexp = RegExp(r'(\s)');
 
@@ -338,7 +339,7 @@ class FlutterMentionsState extends State<FlutterMentions> {
 
       final val = lengthMap.indexWhere((element) {
         return element.end == cursorPos &&
-            element.str.toLowerCase().contains(_patternRegexp);
+            element.str.toLowerCase().contains(_regExp);
       });
 
       final show = val != -1;
@@ -372,7 +373,7 @@ class FlutterMentionsState extends State<FlutterMentions> {
 
   @override
   void initState() {
-    _patternRegexp = RegExp(_mentionsToPattern);
+    _regExp = RegExp(_mentionsToPattern);
 
     final data = mapToAnnotation();
 
@@ -403,28 +404,40 @@ class FlutterMentionsState extends State<FlutterMentions> {
     super.didUpdateWidget(widget);
 
     final pattern = _mentionsToPattern;
-    if (pattern != _patternRegexp.pattern) {
-      _patternRegexp = RegExp(pattern);
+    if (pattern != _regExp.pattern) {
+      _regExp = RegExp(pattern);
     }
 
     controller!.mapping = mapToAnnotation();
   }
 
+  Widget? _getSuggestionListWidget(LengthMap selectedMention) {
+    final mention = widget.mentions.firstWhere(
+      (element) => selectedMention.str.contains(element.trigger),
+    );
+    final str = selectedMention.str.toLowerCase().replaceAll(_regExp, '');
+
+    return OptionList(
+      suggestionListHeight: widget.suggestionListHeight,
+      suggestionBuilder:
+          mention.hasSuggestionBuilder ? mention.suggestionBuilder : null,
+      suggestionListDecoration: widget.suggestionListDecoration,
+      data: mention.data.where((element) {
+        final ele = element.display.toLowerCase();
+        return ele == str ? false : ele.contains(str);
+      }).toList(),
+      onTap: (MentionData value) {
+        addMention(value, mention);
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final currSelectedMention = _selectedMention;
+    final selectedMention = _selectedMention;
 
     final suggestionVisible =
-        currSelectedMention != null && !widget.hideSuggestionList;
-
-    final mention = suggestionVisible
-        ? widget.mentions.firstWhere(
-            (element) => currSelectedMention.str.startsWith(element.trigger))
-        : widget.mentions[0];
-
-    final str = suggestionVisible
-        ? currSelectedMention.str.toLowerCase().replaceAll(_patternRegexp, '')
-        : '';
+        selectedMention != null && !widget.hideSuggestionList;
 
     return PortalTarget(
       visible: suggestionVisible,
@@ -437,22 +450,8 @@ class FlutterMentionsState extends State<FlutterMentions> {
             : Alignment.topCenter,
         alignToPortal: const AxisFlag(x: true),
       ),
-      portalFollower: suggestionVisible
-          ? OptionList(
-              suggestionListHeight: widget.suggestionListHeight,
-              suggestionBuilder: mention.hasSuggestionBuilder
-                  ? mention.suggestionBuilder
-                  : null,
-              suggestionListDecoration: widget.suggestionListDecoration,
-              data: mention.data.where((element) {
-                final ele = element.display.toLowerCase();
-                return ele == str ? false : ele.contains(str);
-              }).toList(),
-              onTap: (MentionData value) {
-                addMention(value, mention);
-              },
-            )
-          : null,
+      portalFollower:
+          suggestionVisible ? _getSuggestionListWidget(selectedMention) : null,
       child: Row(
         children: [
           ...widget.leading,

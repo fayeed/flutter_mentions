@@ -4,11 +4,11 @@ part of flutter_mentions;
 /// trigger based mentions.
 class AnnotationEditingController extends TextEditingController {
   Map<String, Annotation> _mapping;
-  RegExp _patternRegexp;
+  RegExp _regExp;
 
   // Generate the Regex pattern for matching all the suggestions in one.
   AnnotationEditingController(this._mapping)
-      : _patternRegexp = RegExp(_mappingToPattern(_mapping));
+      : _regExp = RegExp(_mappingToPattern(_mapping));
 
   static String _mappingToPattern(Map<String, Annotation> mapping) {
     return "(${mapping.keys.map(RegExp.escape).join('|')})";
@@ -19,7 +19,7 @@ class AnnotationEditingController extends TextEditingController {
     final someVal = _mapping.isEmpty
         ? text
         : text.splitMapJoin(
-            _patternRegexp,
+            _regExp,
             onMatch: (Match match) {
               final mention = _mapping[match[0]!] ??
                   _mapping[_mapping.keys.firstWhere((element) {
@@ -54,8 +54,8 @@ class AnnotationEditingController extends TextEditingController {
     this._mapping = _mapping;
 
     final pattern = _mappingToPattern(_mapping);
-    if (pattern != _patternRegexp.pattern) {
-      _patternRegexp = RegExp(pattern);
+    if (pattern != _regExp.pattern) {
+      _regExp = RegExp(pattern);
     }
   }
 
@@ -68,7 +68,7 @@ class AnnotationEditingController extends TextEditingController {
       children.add(TextSpan(text: text, style: style));
     } else {
       text.splitMapJoin(
-        _patternRegexp,
+        _regExp,
         onMatch: (Match match) {
           if (_mapping.isNotEmpty) {
             final mention = _mapping[match[0]!] ??
