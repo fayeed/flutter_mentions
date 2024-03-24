@@ -2,18 +2,18 @@ part of flutter_mentions;
 
 class OptionList extends StatelessWidget {
   OptionList({
-    required this.data,
-    required this.onTap,
+    required this.suggestions,
+    required this.onSuggestionAdd,
     required this.suggestionListHeight,
     this.suggestionBuilder,
     this.suggestionListDecoration,
   });
 
-  final Widget Function(Map<String, dynamic>)? suggestionBuilder;
+  final SuggestionBuilder? suggestionBuilder;
 
-  final List<Map<String, dynamic>> data;
+  final List<Suggestion> suggestions;
 
-  final Function(Map<String, dynamic>) onTap;
+  final OnSuggestionAdd onSuggestionAdd;
 
   final double suggestionListHeight;
 
@@ -21,7 +21,7 @@ class OptionList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return data.isNotEmpty
+    return suggestions.isNotEmpty
         ? Container(
             decoration:
                 suggestionListDecoration ?? BoxDecoration(color: Colors.white),
@@ -30,20 +30,23 @@ class OptionList extends StatelessWidget {
               minHeight: 0,
             ),
             child: ListView.builder(
-              itemCount: data.length,
+              itemCount: suggestions.length,
               shrinkWrap: true,
               itemBuilder: (context, index) {
+                final currentData = suggestions[index];
+
                 return GestureDetector(
+                  behavior: HitTestBehavior.translucent,
                   onTap: () {
-                    onTap(data[index]);
+                    onSuggestionAdd(currentData);
                   },
                   child: suggestionBuilder != null
-                      ? suggestionBuilder!(data[index])
+                      ? suggestionBuilder!(currentData)
                       : Container(
                           color: Colors.blue,
                           padding: EdgeInsets.all(20.0),
                           child: Text(
-                            data[index]['display'],
+                            currentData.display,
                             style: TextStyle(fontSize: 12),
                           ),
                         ),

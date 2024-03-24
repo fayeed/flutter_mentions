@@ -8,7 +8,7 @@ class FlutterMentions extends StatefulWidget {
     this.suggestionPosition = SuggestionPosition.Bottom,
     this.suggestionListHeight = 300.0,
     this.onMarkupChanged,
-    this.onMentionAdd,
+    this.onSuggestionAdd,
     this.onSearchChanged,
     this.leading = const [],
     this.trailing = const [],
@@ -58,7 +58,7 @@ class FlutterMentions extends StatefulWidget {
   final String? defaultText;
 
   /// Triggers when the suggestion list visibility changed.
-  final Function(bool)? onSuggestionVisibleChanged;
+  final OnSuggestionVisibleChanged? onSuggestionVisibleChanged;
 
   /// List of Mention that the user is allowed to triggered
   final List<Mention> mentions;
@@ -77,7 +77,7 @@ class FlutterMentions extends StatefulWidget {
   final SuggestionPosition suggestionPosition;
 
   /// Triggers when the suggestion was added by tapping on suggestion.
-  final Function(Map<String, dynamic>)? onMentionAdd;
+  final OnSuggestionAdd? onSuggestionAdd;
 
   /// Max height for the suggestion list
   ///
@@ -90,7 +90,7 @@ class FlutterMentions extends StatefulWidget {
   /// This is an optional porperty.
   final ValueChanged<String>? onMarkupChanged;
 
-  final void Function(String trigger, String value)? onSearchChanged;
+  final OnSearchChanged? onSearchChanged;
 
   /// Decoration for the Suggestion list.
   final BoxDecoration? suggestionListDecoration;
@@ -142,7 +142,7 @@ class FlutterMentions extends StatefulWidget {
   final bool enableSuggestions;
 
   /// {@macro flutter.widgets.editableText.maxLines}
-  final int maxLines;
+  final int? maxLines;
 
   /// {@macro flutter.widgets.editableText.minLines}
   final int? minLines;
@@ -247,150 +247,141 @@ class FlutterMentions extends StatefulWidget {
 
 class FlutterMentionsState extends State<FlutterMentions> {
   AnnotationEditingController? controller;
-  ValueNotifier<bool> showSuggestions = ValueNotifier(false);
   LengthMap? _selectedMention;
-  String _pattern = '';
 
-  Map<String, Annotation> mapToAnotation() {
-    final data = <String, Annotation>{};
+  set selectedMention(LengthMap? value) {
+    if (mounted && value != _selectedMention) {
+      setState(() => _selectedMention = value);
+    }
+  }
+
+  late RegExp _regExp;
+
+  static final _whiteSpaceRegexp = RegExp(r'(\s)');
+
+  Map<String, Annotation> mapToAnnotation() {
+    final mapping = <String, Annotation>{};
 
     // Loop over all the mention items and generate a suggestions matching list
-    widget.mentions.forEach((element) {
-      // if matchAll is set to true add a general regex patteren to match with
-      if (element.matchAll) {
-        data['${element.trigger}([A-Za-z0-9])*'] = Annotation(
-          style: element.style,
-          id: null,
-          display: null,
-          trigger: element.trigger,
-          disableMarkup: element.disableMarkup,
-          markupBuilder: element.markupBuilder,
-        );
-      }
+    widget.mentions.forEach(
+      (element) {
+        // if matchAll is set to true add a general regex patteren to match with
+        if (element.matchAll) {
+          mapping['${element.trigger}([A-Za-z0-9])*'] = Annotation(
+            style: element.style,
+            matchAll: true,
+            id: null,
+            display: null,
+            trigger: element.trigger,
+            disableMarkup: element.disableMarkup,
+            markupBuilder: element.markupBuilder,
+          );
+        }
 
-      element.data.forEach(
-        (e) => data["${element.trigger}${e['display']}"] = e['style'] != null
-            ? Annotation(
-                style: e['style'],
-                id: e['id'],
-                display: e['display'],
-                trigger: element.trigger,
-                disableMarkup: element.disableMarkup,
-                markupBuilder: element.markupBuilder,
-              )
-            : Annotation(
-                style: element.style,
-                id: e['id'],
-                display: e['display'],
+        element.suggestions
+            .sorted((a, b) => b.display.length - b.display.length)
+            .forEach(
+              (e) => mapping['${element.trigger}${e.display}'] = Annotation(
+                style: e.style ?? element.style,
+                matchAll: false,
+                id: e.id,
+                display: e.display,
                 trigger: element.trigger,
                 disableMarkup: element.disableMarkup,
                 markupBuilder: element.markupBuilder,
               ),
-      );
-    });
+            );
+      },
+    );
 
-    return data;
+    return mapping;
   }
 
-  void addMention(Map<String, dynamic> value, [Mention? list]) {
-    final selectedMention = _selectedMention!;
-
-    setState(() {
-      _selectedMention = null;
-    });
-
-    final _list = widget.mentions
-        .firstWhere((element) => selectedMention.str.contains(element.trigger));
+  void addSuggestion(Mention mention, Suggestion suggestion) {
+    final currSelectedMention = _selectedMention!;
+    selectedMention = null;
 
     // find the text by range and replace with the new value.
     controller!.text = controller!.value.text.replaceRange(
-      selectedMention.start,
-      selectedMention.end,
-      "${_list.trigger}${value['display']}${widget.appendSpaceOnAdd ? ' ' : ''}",
+      currSelectedMention.start,
+      currSelectedMention.end,
+      "${mention.trigger}${suggestion.display}${widget.appendSpaceOnAdd ? ' ' : ''}",
     );
 
-    if (widget.onMentionAdd != null) widget.onMentionAdd!(value);
+    widget.onSuggestionAdd?.call(suggestion);
 
     // Move the cursor to next position after the new mentioned item.
     var nextCursorPosition =
-        selectedMention.start + 1 + value['display']?.length as int? ?? 0;
-    if (widget.appendSpaceOnAdd) nextCursorPosition++;
-    controller!.selection =
-        TextSelection.fromPosition(TextPosition(offset: nextCursorPosition));
+        currSelectedMention.start + 1 + suggestion.display.length;
+
+    if (widget.appendSpaceOnAdd) {
+      nextCursorPosition++;
+    }
+    controller!.selection = TextSelection.fromPosition(
+      TextPosition(offset: nextCursorPosition),
+    );
   }
 
-  void suggestionListerner() {
+  void suggestionListener() {
     final cursorPos = controller!.selection.baseOffset;
 
     if (cursorPos >= 0) {
-      var _pos = 0;
+      var start = 0;
+      LengthMap? currMention;
+      for (final word in controller!.value.text.split(_whiteSpaceRegexp)) {
+        final end = start + word.length;
 
-      final lengthMap = <LengthMap>[];
-
-      // split on each word and generate a list with start & end position of each word.
-      controller!.value.text.split(RegExp(r'(\s)')).forEach((element) {
-        lengthMap.add(
-            LengthMap(str: element, start: _pos, end: _pos + element.length));
-
-        _pos = _pos + element.length + 1;
-      });
-
-      final val = lengthMap.indexWhere((element) {
-        _pattern = widget.mentions.map((e) => e.trigger).join('|');
-
-        return element.end == cursorPos &&
-            element.str.toLowerCase().contains(RegExp(_pattern));
-      });
-
-      showSuggestions.value = val != -1;
-
-      if (widget.onSuggestionVisibleChanged != null) {
-        widget.onSuggestionVisibleChanged!(val != -1);
+        if (end == cursorPos && word.toLowerCase().contains(_regExp)) {
+          currMention = LengthMap(
+            str: word,
+            start: start,
+            end: end,
+          );
+          break;
+        }
+        start = end + 1;
       }
 
-      setState(() {
-        _selectedMention = val == -1 ? null : lengthMap[val];
-      });
+      widget.onSuggestionVisibleChanged?.call(currMention != null);
+      selectedMention = currMention;
     }
   }
 
   void inputListeners() {
-    if (widget.onChanged != null) {
-      widget.onChanged!(controller!.text);
-    }
-
-    if (widget.onMarkupChanged != null) {
-      widget.onMarkupChanged!(controller!.markupText);
-    }
+    widget.onChanged?.call(controller!.text);
+    widget.onMarkupChanged?.call(controller!.markupText);
 
     if (widget.onSearchChanged != null && _selectedMention?.str != null) {
       final str = _selectedMention!.str.toLowerCase();
-
       widget.onSearchChanged!(str[0], str.substring(1));
     }
   }
 
+  String get _mentionsToPattern =>
+      widget.mentions.map((e) => e.trigger).join('|');
+
   @override
   void initState() {
-    final data = mapToAnotation();
+    super.initState();
 
-    controller = AnnotationEditingController(data);
+    _regExp = RegExp(_mentionsToPattern);
+
+    final mapping = mapToAnnotation();
+
+    controller = AnnotationEditingController(mapping);
 
     if (widget.defaultText != null) {
       controller!.text = widget.defaultText!;
     }
 
     // setup a listener to figure out which suggestions to show based on the trigger
-    controller!.addListener(suggestionListerner);
-
+    controller!.addListener(suggestionListener);
     controller!.addListener(inputListeners);
-
-    super.initState();
   }
 
   @override
   void dispose() {
-    controller!.removeListener(suggestionListerner);
+    controller!.removeListener(suggestionListener);
     controller!.removeListener(inputListeners);
 
     super.dispose();
@@ -400,92 +391,104 @@ class FlutterMentionsState extends State<FlutterMentions> {
   void didUpdateWidget(widget) {
     super.didUpdateWidget(widget);
 
-    controller!.mapping = mapToAnotation();
+    final pattern = _mentionsToPattern;
+    if (pattern != _regExp.pattern) {
+      _regExp = RegExp(pattern);
+    }
+
+    controller!.mapping = mapToAnnotation();
+  }
+
+  Widget? _buildSuggestionListWidget(
+    BuildContext context,
+    LengthMap selectedMention,
+  ) {
+    final mention = widget.mentions.firstWhere(
+      (element) => selectedMention.str.contains(element.trigger),
+    );
+    final str = selectedMention.str.toLowerCase().replaceAll(_regExp, '');
+
+    final suggestions = mention.suggestions.where((element) {
+      final ele = element.display.toLowerCase();
+      return ele == str ? false : ele.contains(str);
+    }).toList();
+
+    void onSuggestionAdd(Suggestion suggestion) =>
+        addSuggestion(mention, suggestion);
+
+    return OptionList(
+      suggestionListHeight: widget.suggestionListHeight,
+      suggestionBuilder:
+          mention.hasSuggestionBuilder ? mention.suggestionBuilder : null,
+      suggestionListDecoration: widget.suggestionListDecoration,
+      suggestions: suggestions,
+      onSuggestionAdd: onSuggestionAdd,
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    // Filter the list based on the selection
-    final list = _selectedMention != null
-        ? widget.mentions.firstWhere(
-            (element) => _selectedMention!.str.contains(element.trigger))
-        : widget.mentions[0];
+    final selectedMention = _selectedMention;
 
-    return Container(
-      child: PortalEntry(
-        portalAnchor: widget.suggestionPosition == SuggestionPosition.Bottom
+    final suggestionVisible =
+        selectedMention != null && !widget.hideSuggestionList;
+
+    return PortalTarget(
+      visible: suggestionVisible,
+      anchor: Aligned(
+        follower: widget.suggestionPosition == SuggestionPosition.Bottom
             ? Alignment.topCenter
             : Alignment.bottomCenter,
-        childAnchor: widget.suggestionPosition == SuggestionPosition.Bottom
+        target: widget.suggestionPosition == SuggestionPosition.Bottom
             ? Alignment.bottomCenter
             : Alignment.topCenter,
-        portal: ValueListenableBuilder(
-          valueListenable: showSuggestions,
-          builder: (BuildContext context, bool show, Widget? child) {
-            return show && !widget.hideSuggestionList
-                ? OptionList(
-                    suggestionListHeight: widget.suggestionListHeight,
-                    suggestionBuilder: list.suggestionBuilder,
-                    suggestionListDecoration: widget.suggestionListDecoration,
-                    data: list.data.where((element) {
-                      final ele = element['display'].toLowerCase();
-                      final str = _selectedMention!.str
-                          .toLowerCase()
-                          .replaceAll(RegExp(_pattern), '');
-
-                      return ele == str ? false : ele.contains(str);
-                    }).toList(),
-                    onTap: (value) {
-                      addMention(value, list);
-                      showSuggestions.value = false;
-                    },
-                  )
-                : Container();
-          },
-        ),
-        child: Row(
-          children: [
-            ...widget.leading,
-            Expanded(
-              child: TextField(
-                maxLines: widget.maxLines,
-                minLines: widget.minLines,
-                maxLength: widget.maxLength,
-                focusNode: widget.focusNode,
-                keyboardType: widget.keyboardType,
-                keyboardAppearance: widget.keyboardAppearance,
-                textInputAction: widget.textInputAction,
-                textCapitalization: widget.textCapitalization,
-                style: widget.style,
-                textAlign: widget.textAlign,
-                textDirection: widget.textDirection,
-                readOnly: widget.readOnly,
-                showCursor: widget.showCursor,
-                autofocus: widget.autofocus,
-                autocorrect: widget.autocorrect,
-                maxLengthEnforcement: widget.maxLengthEnforcement,
-                cursorColor: widget.cursorColor,
-                cursorRadius: widget.cursorRadius,
-                cursorWidth: widget.cursorWidth,
-                buildCounter: widget.buildCounter,
-                autofillHints: widget.autofillHints,
-                decoration: widget.decoration,
-                expands: widget.expands,
-                onEditingComplete: widget.onEditingComplete,
-                onTap: widget.onTap,
-                onSubmitted: widget.onSubmitted,
-                enabled: widget.enabled,
-                enableInteractiveSelection: widget.enableInteractiveSelection,
-                enableSuggestions: widget.enableSuggestions,
-                scrollController: widget.scrollController,
-                scrollPadding: widget.scrollPadding,
-                scrollPhysics: widget.scrollPhysics,
-                controller: controller,
-              ),
+        alignToPortal: const AxisFlag(x: true),
+      ),
+      portalFollower: suggestionVisible
+          ? _buildSuggestionListWidget(context, selectedMention)
+          : null,
+      child: Row(
+        children: [
+          ...widget.leading,
+          Expanded(
+            child: TextField(
+              maxLines: widget.maxLines,
+              minLines: widget.minLines,
+              maxLength: widget.maxLength,
+              focusNode: widget.focusNode,
+              keyboardType: widget.keyboardType,
+              keyboardAppearance: widget.keyboardAppearance,
+              textInputAction: widget.textInputAction,
+              textCapitalization: widget.textCapitalization,
+              style: widget.style,
+              textAlign: widget.textAlign,
+              textDirection: widget.textDirection,
+              readOnly: widget.readOnly,
+              showCursor: widget.showCursor,
+              autofocus: widget.autofocus,
+              autocorrect: widget.autocorrect,
+              maxLengthEnforcement: widget.maxLengthEnforcement,
+              cursorColor: widget.cursorColor,
+              cursorRadius: widget.cursorRadius,
+              cursorWidth: widget.cursorWidth,
+              buildCounter: widget.buildCounter,
+              autofillHints: widget.autofillHints,
+              decoration: widget.decoration,
+              expands: widget.expands,
+              onEditingComplete: widget.onEditingComplete,
+              onTap: widget.onTap,
+              onSubmitted: widget.onSubmitted,
+              enabled: widget.enabled,
+              enableInteractiveSelection: widget.enableInteractiveSelection,
+              enableSuggestions: widget.enableSuggestions,
+              scrollController: widget.scrollController,
+              scrollPadding: widget.scrollPadding,
+              scrollPhysics: widget.scrollPhysics,
+              controller: controller,
             ),
-            ...widget.trailing,
-          ],
-        ),
+          ),
+          ...widget.trailing,
+        ],
       ),
     );
   }
