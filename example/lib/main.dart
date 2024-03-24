@@ -2,31 +2,48 @@ import 'package:flutter/material.dart';
 import 'package:flutter_mentions/flutter_mentions.dart';
 
 void main() {
-  runApp(MyApp());
+  runApp(const MyApp());
+}
+
+@immutable
+class UserSuggestion extends Suggestion {
+  const UserSuggestion({
+    required super.id,
+    required super.display,
+    super.style,
+    required this.fullName,
+    required this.photo,
+  });
+
+  final String fullName;
+  final String photo;
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      builder: (_, child) => Portal(child: child!),
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-        visualDensity: VisualDensity.adaptivePlatformDensity,
+    return Portal(
+      child: MaterialApp(
+        title: 'Flutter Demo',
+        theme: ThemeData(
+          primarySwatch: Colors.blue,
+          visualDensity: VisualDensity.adaptivePlatformDensity,
+        ),
+        home: const MyHomePage(title: 'Flutter Demo Home Page'),
       ),
-      home: MyHomePage(title: 'Flutter Demo Home Page'),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
-  MyHomePage({Key? key, this.title}) : super(key: key);
+  const MyHomePage({Key? key, this.title}) : super(key: key);
 
   final String? title;
 
   @override
-  _MyHomePageState createState() => _MyHomePageState();
+  State<MyHomePage> createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> {
@@ -41,91 +58,141 @@ class _MyHomePageState extends State<MyHomePage> {
       body: Column(
         mainAxisAlignment: MainAxisAlignment.end,
         children: <Widget>[
-          RaisedButton(
-            child: Text('Get Text'),
+          ElevatedButton(
+            child: const Text('Get Text'),
             onPressed: () {
               print(key.currentState!.controller!.markupText);
             },
           ),
-          Container(
+          Flexible(
             child: FlutterMentions(
               key: key,
               suggestionPosition: SuggestionPosition.Top,
               maxLines: 5,
               minLines: 1,
-              decoration: InputDecoration(hintText: 'hello'),
+              decoration: const InputDecoration(hintText: 'hello'),
               mentions: [
-                Mention(
-                    trigger: '@',
-                    style: TextStyle(
-                      color: Colors.amber,
+                Mention<UserSuggestion>(
+                  trigger: '@',
+                  matchAll: false,
+                  style: const TextStyle(
+                    color: Colors.amber,
+                  ),
+                  suggestions: const [
+                    UserSuggestion(
+                      id: '61as61fsa',
+                      display: 'fayeedP',
+                      fullName: 'Fayeed Pawaskar',
+                      photo:
+                          'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940',
                     ),
-                    data: [
-                      {
-                        'id': '61as61fsa',
-                        'display': 'fayeedP',
-                        'full_name': 'Fayeed Pawaskar',
-                        'photo':
-                            'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940'
-                      },
-                      {
-                        'id': '61asasgasgsag6a',
-                        'display': 'khaled',
-                        'full_name': 'DJ Khaled',
-                        'style': TextStyle(color: Colors.purple),
-                        'photo':
-                            'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940'
-                      },
-                      {
-                        'id': 'asfgasga41',
-                        'display': 'markT',
-                        'full_name': 'Mark Twain',
-                        'photo':
-                            'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940'
-                      },
-                      {
-                        'id': 'asfsaf451a',
-                        'display': 'JhonL',
-                        'full_name': 'Jhon Legend',
-                        'photo':
-                            'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940'
-                      },
-                    ],
-                    matchAll: false,
-                    suggestionBuilder: (data) {
-                      return Container(
-                        padding: EdgeInsets.all(10.0),
-                        child: Row(
-                          children: <Widget>[
-                            CircleAvatar(
-                              backgroundImage: NetworkImage(
-                                data['photo'],
-                              ),
-                            ),
-                            SizedBox(
-                              width: 20.0,
-                            ),
-                            Column(
-                              children: <Widget>[
-                                Text(data['full_name']),
-                                Text('@${data['display']}'),
-                              ],
-                            )
-                          ],
-                        ),
-                      );
-                    }),
+                    UserSuggestion(
+                      id: '61asasgasgsag6a',
+                      display: 'khaled',
+                      fullName: 'DJ Khaled',
+                      style: TextStyle(color: Colors.purple),
+                      photo:
+                          'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940',
+                    ),
+                    UserSuggestion(
+                      id: 'asfgasga41',
+                      display: 'markT',
+                      fullName: 'Mark Twain',
+                      photo:
+                          'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940',
+                    ),
+                    UserSuggestion(
+                      id: 'asfsaf451a',
+                      display: 'JhonL',
+                      fullName: 'Jhon Legend',
+                      photo:
+                          'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940',
+                    ),
+                  ],
+                  suggestionBuilder:
+                      (BuildContext context, UserSuggestion suggestion) {
+                    return Container(
+                      padding: const EdgeInsets.all(10.0),
+                      child: Row(
+                        children: <Widget>[
+                          CircleAvatar(
+                            backgroundImage: NetworkImage(suggestion.photo),
+                          ),
+                          const SizedBox(
+                            width: 20.0,
+                          ),
+                          Column(
+                            children: <Widget>[
+                              Text(suggestion.fullName),
+                              Text('@${suggestion.display}'),
+                            ],
+                          )
+                        ],
+                      ),
+                    );
+                  },
+                ),
                 Mention(
                   trigger: '#',
+                  matchAll: true,
                   disableMarkup: true,
                   style: TextStyle(
                     color: Colors.blue,
                   ),
-                  data: [
-                    {'id': 'reactjs', 'display': 'reactjs'},
-                    {'id': 'javascript', 'display': 'javascript'},
+                  suggestions: [
+                    Suggestion(id: 'reactjs', display: 'reactjs'),
+                    Suggestion(id: 'javascript', display: 'javascript'),
                   ],
-                  matchAll: true,
+                  suggestionListBuilder: ({
+                    required BuildContext context,
+                    required Mention<Suggestion> mention,
+                    required List<Suggestion> suggestions,
+                    required OnSuggestionAdd<Suggestion> onSuggestionAdd,
+                  }) {
+                    if (suggestions.isEmpty) {
+                      return const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(),
+                      );
+                    }
+
+                    return ConstrainedBox(
+                      constraints: BoxConstraints(maxHeight: 200),
+                      child: ListView.builder(
+                        itemCount: suggestions.length + 1,
+                        shrinkWrap: true,
+                        itemBuilder: (context, index) {
+                          if (index == suggestions.length) {
+                            return Center(
+                              child: const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(),
+                              ),
+                            );
+                          }
+
+                          final currentData = suggestions[index];
+
+                          return GestureDetector(
+                            behavior: HitTestBehavior.translucent,
+                            onTap: () => onSuggestionAdd(currentData),
+                            child: Padding(
+                              padding: const EdgeInsets.all(10.0),
+                              child: Row(
+                                children: [
+                                  Text('${index + 1}'),
+                                  SizedBox(width: 10),
+                                  Text('#${currentData.display}'),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    );
+                  },
                 )
               ],
             ),

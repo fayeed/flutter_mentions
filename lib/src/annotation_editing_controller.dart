@@ -4,36 +4,43 @@ part of flutter_mentions;
 /// trigger based mentions.
 class AnnotationEditingController extends TextEditingController {
   Map<String, Annotation> _mapping;
-  String? _pattern;
+  RegExp _regExp;
 
   // Generate the Regex pattern for matching all the suggestions in one.
   AnnotationEditingController(this._mapping)
-      : _pattern = _mapping.keys.isNotEmpty
-            ? "(${_mapping.keys.map((key) => RegExp.escape(key)).join('|')})"
-            : null;
+      : _regExp = RegExp(_mappingToPattern(_mapping));
+
+  static String _mappingToPattern(Map<String, Annotation> mapping) {
+    return "(${mapping.entries.map((e) => e.value.matchAll ? e.key : RegExp.escape(e.key)).join('|')})";
+  }
 
   /// Can be used to get the markup from the controller directly.
   String get markupText {
     final someVal = _mapping.isEmpty
         ? text
         : text.splitMapJoin(
-            RegExp('$_pattern'),
+            _regExp,
             onMatch: (Match match) {
-              final mention = _mapping[match[0]!] ??
+              final val = match[0]!;
+
+              final mention = _mapping[val] ??
                   _mapping[_mapping.keys.firstWhere((element) {
                     final reg = RegExp(element);
 
-                    return reg.hasMatch(match[0]!);
+                    return reg.hasMatch(val);
                   })]!;
 
               // Default markup format for mentions
               if (!mention.disableMarkup) {
                 return mention.markupBuilder != null
                     ? mention.markupBuilder!(
-                        mention.trigger, mention.id!, mention.display!)
-                    : '${mention.trigger}[__${mention.id}__](__${mention.display}__)';
+                        mention.trigger,
+                        mention.id ?? val,
+                        mention.display ?? val,
+                      )
+                    : '${mention.trigger}[__${mention.id ?? val}__](__${mention.display ?? val}__)';
               } else {
-                return match[0]!;
+                return val;
               }
             },
             onNonMatch: (String text) {
@@ -51,30 +58,36 @@ class AnnotationEditingController extends TextEditingController {
   set mapping(Map<String, Annotation> _mapping) {
     this._mapping = _mapping;
 
-    _pattern = "(${_mapping.keys.map((key) => RegExp.escape(key)).join('|')})";
+    final pattern = _mappingToPattern(_mapping);
+    if (pattern != _regExp.pattern) {
+      _regExp = RegExp(pattern);
+    }
   }
 
   @override
-  TextSpan buildTextSpan({BuildContext? context, TextStyle? style, bool? withComposing}) {
+  TextSpan buildTextSpan(
+      {BuildContext? context, TextStyle? style, bool? withComposing}) {
     var children = <InlineSpan>[];
 
-    if (_pattern == null || _pattern == '()') {
+    if (mapping.isEmpty) {
       children.add(TextSpan(text: text, style: style));
     } else {
       text.splitMapJoin(
-        RegExp('$_pattern'),
+        _regExp,
         onMatch: (Match match) {
           if (_mapping.isNotEmpty) {
-            final mention = _mapping[match[0]!] ??
+            final val = match[0]!;
+
+            final mention = _mapping[val] ??
                 _mapping[_mapping.keys.firstWhere((element) {
                   final reg = RegExp(element);
 
-                  return reg.hasMatch(match[0]!);
+                  return reg.hasMatch(val);
                 })]!;
 
             children.add(
               TextSpan(
-                text: match[0],
+                text: val,
                 style: style!.merge(mention.style),
               ),
             );
