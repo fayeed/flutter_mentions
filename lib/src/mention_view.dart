@@ -326,27 +326,24 @@ class FlutterMentionsState extends State<FlutterMentions> {
     final cursorPos = controller!.selection.baseOffset;
 
     if (cursorPos >= 0) {
-      var _pos = 0;
+      var start = 0;
+      LengthMap? currMention;
+      for (final word in controller!.value.text.split(_whiteSpaceRegexp)) {
+        final end = start + word.length;
 
-      final lengthMap = <LengthMap>[];
+        if (end == cursorPos && word.toLowerCase().contains(_regExp)) {
+          currMention = LengthMap(
+            str: word,
+            start: start,
+            end: end,
+          );
+          break;
+        }
+        start = end + 1;
+      }
 
-      // split on each word and generate a list with start & end position of each word.
-      controller!.value.text.split(_whiteSpaceRegexp).forEach((element) {
-        lengthMap.add(
-          LengthMap(str: element, start: _pos, end: _pos + element.length),
-        );
-
-        _pos = _pos + element.length + 1;
-      });
-
-      final val = lengthMap.indexWhere((element) {
-        return element.end == cursorPos &&
-            element.str.toLowerCase().contains(_regExp);
-      });
-
-      final show = val != -1;
-      widget.onSuggestionVisibleChanged?.call(show);
-      selectedMention = show ? lengthMap[val] : null;
+      widget.onSuggestionVisibleChanged?.call(currMention != null);
+      selectedMention = currMention;
     }
   }
 
@@ -365,6 +362,8 @@ class FlutterMentionsState extends State<FlutterMentions> {
 
   @override
   void initState() {
+    super.initState();
+
     _regExp = RegExp(_mentionsToPattern);
 
     final mapping = mapToAnnotation();
@@ -378,8 +377,6 @@ class FlutterMentionsState extends State<FlutterMentions> {
     // setup a listener to figure out which suggestions to show based on the trigger
     controller!.addListener(suggestionListener);
     controller!.addListener(inputListeners);
-
-    super.initState();
   }
 
   @override
@@ -402,7 +399,10 @@ class FlutterMentionsState extends State<FlutterMentions> {
     controller!.mapping = mapToAnnotation();
   }
 
-  Widget? _getSuggestionListWidget(LengthMap selectedMention) {
+  Widget? _buildSuggestionListWidget(
+    BuildContext context,
+    LengthMap selectedMention,
+  ) {
     final mention = widget.mentions.firstWhere(
       (element) => selectedMention.str.contains(element.trigger),
     );
@@ -444,8 +444,9 @@ class FlutterMentionsState extends State<FlutterMentions> {
             : Alignment.topCenter,
         alignToPortal: const AxisFlag(x: true),
       ),
-      portalFollower:
-          suggestionVisible ? _getSuggestionListWidget(selectedMention) : null,
+      portalFollower: suggestionVisible
+          ? _buildSuggestionListWidget(context, selectedMention)
+          : null,
       child: Row(
         children: [
           ...widget.leading,
