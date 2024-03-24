@@ -88,9 +88,9 @@ class Mention<T extends MentionData> {
   bool get hasSuggestionBuilder => _suggestionBuilder != null;
 
   // https://github.com/dart-lang/sdk/issues/55286
-  Widget suggestionBuilder(MentionData value) {
+  Widget suggestionBuilder(T value) {
     assert(hasSuggestionBuilder);
-    return _suggestionBuilder!(value as T);
+    return _suggestionBuilder!(value);
   }
 
   /// Allows to set custom markup for the mentioned item.
