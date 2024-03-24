@@ -1,19 +1,19 @@
 part of flutter_mentions;
 
-typedef SuggestionsBuilder<T extends MentionData> = Widget Function(T data);
+typedef SuggestionBuilder<T extends Suggestion> = Widget Function(T suggestion);
 typedef MarkupBuilder = String Function(
   String trigger,
   String mention,
   String value,
 );
-typedef OnMentionTap<T extends MentionData> = void Function(T mentionData);
+typedef OnSuggestionAdd<T extends Suggestion> = void Function(T suggestion);
 typedef OnSearchChanged = void Function(String trigger, String value);
 typedef OnSuggestionVisibleChanged = void Function(bool);
-typedef SuggestionListBuilder<T extends MentionData> = Widget Function({
+typedef SuggestionListBuilder<T extends Suggestion> = Widget Function({
   BuildContext context,
   Mention<T> mention,
-  List<T> filteredData,
-  OnMentionTap<T> onMentionDataTap,
+  List<T> filteredSuggestions,
+  OnSuggestionAdd<T> onSuggestionAdd,
 });
 
 enum SuggestionPosition { Top, Bottom }
@@ -44,8 +44,8 @@ class LengthMap {
 }
 
 @immutable
-class MentionData {
-  const MentionData({
+class Suggestion {
+  const Suggestion({
     required this.id,
     required this.display,
     this.style,
@@ -58,7 +58,7 @@ class MentionData {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is MentionData &&
+      other is Suggestion &&
           runtimeType == other.runtimeType &&
           id == other.id &&
           display == other.display &&
@@ -69,13 +69,13 @@ class MentionData {
 }
 
 @immutable
-class Mention<T extends MentionData> {
+class Mention<T extends Suggestion> {
   const Mention({
     required this.trigger,
-    this.data = const [],
+    this.suggestions = const [],
     this.style,
     this.matchAll = false,
-    SuggestionsBuilder<T>? suggestionBuilder,
+    SuggestionBuilder<T>? suggestionBuilder,
     this.disableMarkup = false,
     this.markupBuilder,
   }) : _suggestionBuilder = suggestionBuilder;
@@ -83,9 +83,9 @@ class Mention<T extends MentionData> {
   /// A single character that will be used to trigger the suggestions.
   final String trigger;
 
-  /// List of [MentionData] or it's subclass to represent the suggestions shown
+  /// List of [Suggestion] or it's subclass to represent the suggestions shown
   /// to the user
-  final List<T> data;
+  final List<T> suggestions;
 
   /// Style for the mention item in Input.
   final TextStyle? style;
@@ -97,7 +97,7 @@ class Mention<T extends MentionData> {
   final bool disableMarkup;
 
   /// Build Custom suggestion widget using this builder.
-  final SuggestionsBuilder<T>? _suggestionBuilder;
+  final SuggestionBuilder<T>? _suggestionBuilder;
 
   bool get hasSuggestionBuilder => _suggestionBuilder != null;
 
@@ -116,7 +116,7 @@ class Mention<T extends MentionData> {
       other is Mention &&
           runtimeType == other.runtimeType &&
           trigger == other.trigger &&
-          data == other.data &&
+          suggestions == other.suggestions &&
           style == other.style &&
           matchAll == other.matchAll &&
           disableMarkup == other.disableMarkup &&
@@ -126,7 +126,7 @@ class Mention<T extends MentionData> {
   @override
   int get hashCode => Object.hash(
         trigger,
-        data,
+        suggestions,
         style,
         matchAll,
         disableMarkup,

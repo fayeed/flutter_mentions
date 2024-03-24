@@ -2,18 +2,18 @@ part of flutter_mentions;
 
 class OptionList extends StatelessWidget {
   OptionList({
-    required this.data,
-    required this.onTap,
+    required this.suggestions,
+    required this.onSuggestionAdd,
     required this.suggestionListHeight,
     this.suggestionBuilder,
     this.suggestionListDecoration,
   });
 
-  final SuggestionsBuilder? suggestionBuilder;
+  final SuggestionBuilder? suggestionBuilder;
 
-  final List<MentionData> data;
+  final List<Suggestion> suggestions;
 
-  final OnMentionTap onTap;
+  final OnSuggestionAdd onSuggestionAdd;
 
   final double suggestionListHeight;
 
@@ -21,7 +21,7 @@ class OptionList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return data.isNotEmpty
+    return suggestions.isNotEmpty
         ? Container(
             decoration:
                 suggestionListDecoration ?? BoxDecoration(color: Colors.white),
@@ -30,15 +30,15 @@ class OptionList extends StatelessWidget {
               minHeight: 0,
             ),
             child: ListView.builder(
-              itemCount: data.length,
+              itemCount: suggestions.length,
               shrinkWrap: true,
               itemBuilder: (context, index) {
-                final currentData = data[index];
+                final currentData = suggestions[index];
 
                 return GestureDetector(
                   behavior: HitTestBehavior.translucent,
                   onTap: () {
-                    onTap(currentData);
+                    onSuggestionAdd(currentData);
                   },
                   child: suggestionBuilder != null
                       ? suggestionBuilder!(currentData)

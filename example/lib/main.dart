@@ -6,8 +6,8 @@ void main() {
 }
 
 @immutable
-class CustomMentionData extends MentionData {
-  const CustomMentionData({
+class UserSuggestion extends Suggestion {
+  const UserSuggestion({
     required super.id,
     required super.display,
     super.style,
@@ -72,20 +72,20 @@ class _MyHomePageState extends State<MyHomePage> {
               minLines: 1,
               decoration: const InputDecoration(hintText: 'hello'),
               mentions: [
-                Mention<CustomMentionData>(
+                Mention<UserSuggestion>(
                   trigger: '@',
                   style: const TextStyle(
                     color: Colors.amber,
                   ),
-                  data: const [
-                    CustomMentionData(
+                  suggestions: const [
+                    UserSuggestion(
                       id: '61as61fsa',
                       display: 'fayeedP',
                       fullName: 'Fayeed Pawaskar',
                       photo:
                           'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940',
                     ),
-                    CustomMentionData(
+                    UserSuggestion(
                       id: '61asasgasgsag6a',
                       display: 'khaled',
                       fullName: 'DJ Khaled',
@@ -93,14 +93,14 @@ class _MyHomePageState extends State<MyHomePage> {
                       photo:
                           'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940',
                     ),
-                    CustomMentionData(
+                    UserSuggestion(
                       id: 'asfgasga41',
                       display: 'markT',
                       fullName: 'Mark Twain',
                       photo:
                           'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940',
                     ),
-                    CustomMentionData(
+                    UserSuggestion(
                       id: 'asfsaf451a',
                       display: 'JhonL',
                       fullName: 'Jhon Legend',
@@ -109,21 +109,21 @@ class _MyHomePageState extends State<MyHomePage> {
                     ),
                   ],
                   matchAll: false,
-                  suggestionBuilder: (CustomMentionData data) {
+                  suggestionBuilder: (UserSuggestion suggestion) {
                     return Container(
                       padding: const EdgeInsets.all(10.0),
                       child: Row(
                         children: <Widget>[
                           CircleAvatar(
-                            backgroundImage: NetworkImage(data.photo),
+                            backgroundImage: NetworkImage(suggestion.photo),
                           ),
                           const SizedBox(
                             width: 20.0,
                           ),
                           Column(
                             children: <Widget>[
-                              Text(data.fullName),
-                              Text('@${data.display}'),
+                              Text(suggestion.fullName),
+                              Text('@${suggestion.display}'),
                             ],
                           )
                         ],
@@ -137,9 +137,9 @@ class _MyHomePageState extends State<MyHomePage> {
                   style: TextStyle(
                     color: Colors.blue,
                   ),
-                  data: [
-                    MentionData(id: 'reactjs', display: 'reactjs'),
-                    MentionData(id: 'javascript', display: 'javascript'),
+                  suggestions: [
+                    Suggestion(id: 'reactjs', display: 'reactjs'),
+                    Suggestion(id: 'javascript', display: 'javascript'),
                   ],
                   matchAll: true,
                 )

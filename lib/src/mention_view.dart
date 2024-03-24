@@ -8,7 +8,7 @@ class FlutterMentions extends StatefulWidget {
     this.suggestionPosition = SuggestionPosition.Bottom,
     this.suggestionListHeight = 300.0,
     this.onMarkupChanged,
-    this.onMentionAdd,
+    this.onSuggestionAdd,
     this.onSearchChanged,
     this.leading = const [],
     this.trailing = const [],
@@ -77,7 +77,7 @@ class FlutterMentions extends StatefulWidget {
   final SuggestionPosition suggestionPosition;
 
   /// Triggers when the suggestion was added by tapping on suggestion.
-  final OnMentionTap? onMentionAdd;
+  final OnSuggestionAdd? onSuggestionAdd;
 
   /// Max height for the suggestion list
   ///
@@ -260,14 +260,14 @@ class FlutterMentionsState extends State<FlutterMentions> {
   static final _whiteSpaceRegexp = RegExp(r'(\s)');
 
   Map<String, Annotation> mapToAnnotation() {
-    final data = <String, Annotation>{};
+    final mapping = <String, Annotation>{};
 
     // Loop over all the mention items and generate a suggestions matching list
     widget.mentions.forEach(
       (element) {
         // if matchAll is set to true add a general regex patteren to match with
         if (element.matchAll) {
-          data['${element.trigger}([A-Za-z0-9])*'] = Annotation(
+          mapping['${element.trigger}([A-Za-z0-9])*'] = Annotation(
             style: element.style,
             matchAll: true,
             id: null,
@@ -278,10 +278,10 @@ class FlutterMentionsState extends State<FlutterMentions> {
           );
         }
 
-        element.data
+        element.suggestions
             .sorted((a, b) => b.display.length - b.display.length)
             .forEach(
-              (e) => data['${element.trigger}${e.display}'] = Annotation(
+              (e) => mapping['${element.trigger}${e.display}'] = Annotation(
                 style: e.style ?? element.style,
                 matchAll: false,
                 id: e.id,
@@ -294,10 +294,10 @@ class FlutterMentionsState extends State<FlutterMentions> {
       },
     );
 
-    return data;
+    return mapping;
   }
 
-  void addMention(MentionData value, Mention mention) {
+  void addSuggestion(Mention mention, Suggestion suggestion) {
     final currSelectedMention = _selectedMention!;
     selectedMention = null;
 
@@ -305,14 +305,14 @@ class FlutterMentionsState extends State<FlutterMentions> {
     controller!.text = controller!.value.text.replaceRange(
       currSelectedMention.start,
       currSelectedMention.end,
-      "${mention.trigger}${value.display}${widget.appendSpaceOnAdd ? ' ' : ''}",
+      "${mention.trigger}${suggestion.display}${widget.appendSpaceOnAdd ? ' ' : ''}",
     );
 
-    if (widget.onMentionAdd != null) widget.onMentionAdd!(value);
+    widget.onSuggestionAdd?.call(suggestion);
 
     // Move the cursor to next position after the new mentioned item.
     var nextCursorPosition =
-        currSelectedMention.start + 1 + value.display.length;
+        currSelectedMention.start + 1 + suggestion.display.length;
 
     if (widget.appendSpaceOnAdd) {
       nextCursorPosition++;
@@ -345,27 +345,17 @@ class FlutterMentionsState extends State<FlutterMentions> {
       });
 
       final show = val != -1;
-
-      if (widget.onSuggestionVisibleChanged != null) {
-        widget.onSuggestionVisibleChanged!(show);
-      }
-
+      widget.onSuggestionVisibleChanged?.call(show);
       selectedMention = show ? lengthMap[val] : null;
     }
   }
 
   void inputListeners() {
-    if (widget.onChanged != null) {
-      widget.onChanged!(controller!.text);
-    }
-
-    if (widget.onMarkupChanged != null) {
-      widget.onMarkupChanged!(controller!.markupText);
-    }
+    widget.onChanged?.call(controller!.text);
+    widget.onMarkupChanged?.call(controller!.markupText);
 
     if (widget.onSearchChanged != null && _selectedMention?.str != null) {
       final str = _selectedMention!.str.toLowerCase();
-
       widget.onSearchChanged!(str[0], str.substring(1));
     }
   }
@@ -377,9 +367,9 @@ class FlutterMentionsState extends State<FlutterMentions> {
   void initState() {
     _regExp = RegExp(_mentionsToPattern);
 
-    final data = mapToAnnotation();
+    final mapping = mapToAnnotation();
 
-    controller = AnnotationEditingController(data);
+    controller = AnnotationEditingController(mapping);
 
     if (widget.defaultText != null) {
       controller!.text = widget.defaultText!;
@@ -387,7 +377,6 @@ class FlutterMentionsState extends State<FlutterMentions> {
 
     // setup a listener to figure out which suggestions to show based on the trigger
     controller!.addListener(suggestionListener);
-
     controller!.addListener(inputListeners);
 
     super.initState();
@@ -419,20 +408,21 @@ class FlutterMentionsState extends State<FlutterMentions> {
     );
     final str = selectedMention.str.toLowerCase().replaceAll(_regExp, '');
 
-    final filteredData = mention.data.where((element) {
+    final suggestions = mention.suggestions.where((element) {
       final ele = element.display.toLowerCase();
       return ele == str ? false : ele.contains(str);
     }).toList();
 
-    void onTap(MentionData value) => addMention(value, mention);
+    void onSuggestionAdd(Suggestion suggestion) =>
+        addSuggestion(mention, suggestion);
 
     return OptionList(
       suggestionListHeight: widget.suggestionListHeight,
       suggestionBuilder:
           mention.hasSuggestionBuilder ? mention.suggestionBuilder : null,
       suggestionListDecoration: widget.suggestionListDecoration,
-      data: filteredData,
-      onTap: onTap,
+      suggestions: suggestions,
+      onSuggestionAdd: onSuggestionAdd,
     );
   }
 
