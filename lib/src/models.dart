@@ -1,6 +1,9 @@
 part of flutter_mentions;
 
-typedef SuggestionBuilder<T extends Suggestion> = Widget Function(T suggestion);
+typedef SuggestionBuilder<T extends Suggestion> = Widget Function(
+  BuildContext context,
+  T suggestion,
+);
 typedef MarkupBuilder = String Function(
   String trigger,
   String mention,
@@ -10,10 +13,10 @@ typedef OnSuggestionAdd<T extends Suggestion> = void Function(T suggestion);
 typedef OnSearchChanged = void Function(String trigger, String value);
 typedef OnSuggestionVisibleChanged = void Function(bool);
 typedef SuggestionListBuilder<T extends Suggestion> = Widget Function({
-  BuildContext context,
-  Mention<T> mention,
-  List<T> filteredSuggestions,
-  OnSuggestionAdd<T> onSuggestionAdd,
+  required BuildContext context,
+  required Mention<T> mention,
+  required List<T> suggestions,
+  required OnSuggestionAdd<T> onSuggestionAdd,
 });
 
 enum SuggestionPosition { Top, Bottom }
@@ -76,9 +79,11 @@ class Mention<T extends Suggestion> {
     this.style,
     this.matchAll = false,
     SuggestionBuilder<T>? suggestionBuilder,
+    SuggestionListBuilder<T>? suggestionListBuilder,
     this.disableMarkup = false,
     this.markupBuilder,
-  }) : _suggestionBuilder = suggestionBuilder;
+  })  : _suggestionBuilder = suggestionBuilder,
+        _suggestionListBuilder = suggestionListBuilder;
 
   /// A single character that will be used to trigger the suggestions.
   final String trigger;
@@ -102,9 +107,30 @@ class Mention<T extends Suggestion> {
   bool get hasSuggestionBuilder => _suggestionBuilder != null;
 
   // https://github.com/dart-lang/sdk/issues/55286
-  Widget suggestionBuilder(T value) {
+  Widget suggestionBuilder(BuildContext context, T value) {
     assert(hasSuggestionBuilder);
-    return _suggestionBuilder!(value);
+    return _suggestionBuilder!(context, value);
+  }
+
+  /// Build Custom suggestion list widget using this builder.
+  final SuggestionListBuilder<T>? _suggestionListBuilder;
+
+  bool get hasSuggestionListBuilder => _suggestionListBuilder != null;
+
+  // https://github.com/dart-lang/sdk/issues/55286
+  Widget suggestionListBuilder({
+    required BuildContext context,
+    required Mention<T> mention,
+    required List<T> suggestions,
+    required OnSuggestionAdd<T> onSuggestionAdd,
+  }) {
+    assert(hasSuggestionListBuilder);
+    return _suggestionListBuilder!(
+      context: context,
+      mention: mention,
+      suggestions: suggestions,
+      onSuggestionAdd: onSuggestionAdd,
+    );
   }
 
   /// Allows to set custom markup for the mentioned item.

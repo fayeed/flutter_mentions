@@ -41,7 +41,7 @@ class OptionList extends StatelessWidget {
                     onSuggestionAdd(currentData);
                   },
                   child: suggestionBuilder != null
-                      ? suggestionBuilder!(currentData)
+                      ? suggestionBuilder!(context, currentData)
                       : Container(
                           color: Colors.blue,
                           padding: EdgeInsets.all(20.0),

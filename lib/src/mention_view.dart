@@ -416,6 +416,15 @@ class FlutterMentionsState extends State<FlutterMentions> {
     void onSuggestionAdd(Suggestion suggestion) =>
         addSuggestion(mention, suggestion);
 
+    if (mention.hasSuggestionListBuilder) {
+      return mention.suggestionListBuilder(
+        context: context,
+        mention: mention,
+        suggestions: suggestions,
+        onSuggestionAdd: onSuggestionAdd,
+      );
+    }
+
     return OptionList(
       suggestionListHeight: widget.suggestionListHeight,
       suggestionBuilder:

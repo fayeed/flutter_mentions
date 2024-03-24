@@ -74,6 +74,7 @@ class _MyHomePageState extends State<MyHomePage> {
               mentions: [
                 Mention<UserSuggestion>(
                   trigger: '@',
+                  matchAll: false,
                   style: const TextStyle(
                     color: Colors.amber,
                   ),
@@ -108,8 +109,8 @@ class _MyHomePageState extends State<MyHomePage> {
                           'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940',
                     ),
                   ],
-                  matchAll: false,
-                  suggestionBuilder: (UserSuggestion suggestion) {
+                  suggestionBuilder:
+                      (BuildContext context, UserSuggestion suggestion) {
                     return Container(
                       padding: const EdgeInsets.all(10.0),
                       child: Row(
@@ -131,8 +132,9 @@ class _MyHomePageState extends State<MyHomePage> {
                     );
                   },
                 ),
-                const Mention(
+                Mention(
                   trigger: '#',
+                  matchAll: true,
                   disableMarkup: true,
                   style: TextStyle(
                     color: Colors.blue,
@@ -141,7 +143,56 @@ class _MyHomePageState extends State<MyHomePage> {
                     Suggestion(id: 'reactjs', display: 'reactjs'),
                     Suggestion(id: 'javascript', display: 'javascript'),
                   ],
-                  matchAll: true,
+                  suggestionListBuilder: ({
+                    required BuildContext context,
+                    required Mention<Suggestion> mention,
+                    required List<Suggestion> suggestions,
+                    required OnSuggestionAdd<Suggestion> onSuggestionAdd,
+                  }) {
+                    if (suggestions.isEmpty) {
+                      return const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(),
+                      );
+                    }
+
+                    return ConstrainedBox(
+                      constraints: BoxConstraints(maxHeight: 200),
+                      child: ListView.builder(
+                        itemCount: suggestions.length + 1,
+                        shrinkWrap: true,
+                        itemBuilder: (context, index) {
+                          if (index == suggestions.length) {
+                            return Center(
+                              child: const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(),
+                              ),
+                            );
+                          }
+
+                          final currentData = suggestions[index];
+
+                          return GestureDetector(
+                            behavior: HitTestBehavior.translucent,
+                            onTap: () => onSuggestionAdd(currentData),
+                            child: Padding(
+                              padding: const EdgeInsets.all(10.0),
+                              child: Row(
+                                children: [
+                                  Text('${index + 1}'),
+                                  SizedBox(width: 10),
+                                  Text('#${currentData.display}'),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    );
+                  },
                 )
               ],
             ),
