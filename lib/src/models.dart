@@ -1,5 +1,21 @@
 part of flutter_mentions;
 
+typedef SuggestionsBuilder<T extends MentionData> = Widget Function(T data);
+typedef MarkupBuilder = String Function(
+  String trigger,
+  String mention,
+  String value,
+);
+typedef OnMentionTap<T extends MentionData> = void Function(T mentionData);
+typedef OnSearchChanged = void Function(String trigger, String value);
+typedef OnSuggestionVisibleChanged = void Function(bool);
+typedef SuggestionListBuilder<T extends MentionData> = Widget Function({
+  BuildContext context,
+  Mention<T> mention,
+  List<T> filteredData,
+  OnMentionTap<T> onMentionDataTap,
+});
+
 enum SuggestionPosition { Top, Bottom }
 
 @immutable
@@ -52,8 +68,6 @@ class MentionData {
   int get hashCode => Object.hash(id, display, style);
 }
 
-typedef SuggestionsBuilder<T extends MentionData> = Widget Function(T data);
-
 @immutable
 class Mention<T extends MentionData> {
   const Mention({
@@ -61,7 +75,7 @@ class Mention<T extends MentionData> {
     this.data = const [],
     this.style,
     this.matchAll = false,
-    Widget Function(T)? suggestionBuilder,
+    SuggestionsBuilder<T>? suggestionBuilder,
     this.disableMarkup = false,
     this.markupBuilder,
   }) : _suggestionBuilder = suggestionBuilder;
@@ -83,7 +97,7 @@ class Mention<T extends MentionData> {
   final bool disableMarkup;
 
   /// Build Custom suggestion widget using this builder.
-  final Widget Function(T)? _suggestionBuilder;
+  final SuggestionsBuilder<T>? _suggestionBuilder;
 
   bool get hasSuggestionBuilder => _suggestionBuilder != null;
 
@@ -94,8 +108,7 @@ class Mention<T extends MentionData> {
   }
 
   /// Allows to set custom markup for the mentioned item.
-  final String Function(String trigger, String mention, String value)?
-      markupBuilder;
+  final MarkupBuilder? markupBuilder;
 
   @override
   bool operator ==(Object other) =>
@@ -140,8 +153,7 @@ class Annotation {
   final String? display;
   final String trigger;
   final bool disableMarkup;
-  final String Function(String trigger, String mention, String value)?
-      markupBuilder;
+  final MarkupBuilder? markupBuilder;
 
   @override
   bool operator ==(Object other) =>

@@ -9,11 +9,11 @@ class OptionList extends StatelessWidget {
     this.suggestionListDecoration,
   });
 
-  final Widget Function(MentionData)? suggestionBuilder;
+  final SuggestionsBuilder? suggestionBuilder;
 
   final List<MentionData> data;
 
-  final Function(MentionData) onTap;
+  final OnMentionTap onTap;
 
   final double suggestionListHeight;
 

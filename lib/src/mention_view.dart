@@ -58,7 +58,7 @@ class FlutterMentions extends StatefulWidget {
   final String? defaultText;
 
   /// Triggers when the suggestion list visibility changed.
-  final Function(bool)? onSuggestionVisibleChanged;
+  final OnSuggestionVisibleChanged? onSuggestionVisibleChanged;
 
   /// List of Mention that the user is allowed to triggered
   final List<Mention> mentions;
@@ -77,7 +77,7 @@ class FlutterMentions extends StatefulWidget {
   final SuggestionPosition suggestionPosition;
 
   /// Triggers when the suggestion was added by tapping on suggestion.
-  final Function(MentionData)? onMentionAdd;
+  final OnMentionTap? onMentionAdd;
 
   /// Max height for the suggestion list
   ///
@@ -90,7 +90,7 @@ class FlutterMentions extends StatefulWidget {
   /// This is an optional porperty.
   final ValueChanged<String>? onMarkupChanged;
 
-  final void Function(String trigger, String value)? onSearchChanged;
+  final OnSearchChanged? onSearchChanged;
 
   /// Decoration for the Suggestion list.
   final BoxDecoration? suggestionListDecoration;
@@ -419,18 +419,20 @@ class FlutterMentionsState extends State<FlutterMentions> {
     );
     final str = selectedMention.str.toLowerCase().replaceAll(_regExp, '');
 
+    final filteredData = mention.data.where((element) {
+      final ele = element.display.toLowerCase();
+      return ele == str ? false : ele.contains(str);
+    }).toList();
+
+    void onTap(MentionData value) => addMention(value, mention);
+
     return OptionList(
       suggestionListHeight: widget.suggestionListHeight,
       suggestionBuilder:
           mention.hasSuggestionBuilder ? mention.suggestionBuilder : null,
       suggestionListDecoration: widget.suggestionListDecoration,
-      data: mention.data.where((element) {
-        final ele = element.display.toLowerCase();
-        return ele == str ? false : ele.contains(str);
-      }).toList(),
-      onTap: (MentionData value) {
-        addMention(value, mention);
-      },
+      data: filteredData,
+      onTap: onTap,
     );
   }
 
