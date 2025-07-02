@@ -1,3 +1,8 @@
+## [3.0.0] - 1 Jul 2025
+
+- Breaking: Environment requires minimum sdk version >=3.1.3
+- Breaking: Flutter Portal version updated to 1.1.4
+
 ## [2.0.1] - 24 May 2021
 
 - Added support for Flutter 2.2.0
