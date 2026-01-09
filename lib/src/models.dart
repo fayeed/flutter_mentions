@@ -1,7 +1,9 @@
 part of flutter_mentions;
 
-enum SuggestionPosition { Top, Bottom }
+/// Position for the suggestion list relative to the input field.
+enum SuggestionPosition { top, bottom }
 
+/// Helper class to track word positions in the text.
 class LengthMap {
   LengthMap({
     required this.start,
@@ -9,11 +11,15 @@ class LengthMap {
     required this.str,
   });
 
-  String str;
-  int start;
-  int end;
+  final String str;
+  final int start;
+  final int end;
 }
 
+/// Configuration for a mention trigger.
+///
+/// Each [Mention] defines a trigger character and its associated data
+/// for suggestions.
 class Mention {
   Mention({
     required this.trigger,
@@ -23,14 +29,14 @@ class Mention {
     this.suggestionBuilder,
     this.disableMarkup = false,
     this.markupBuilder,
-  });
+  }) : assert(trigger.length == 1, 'Trigger must be a single character');
 
   /// A single character that will be used to trigger the suggestions.
   final String trigger;
 
-  /// List of Map to represent the suggestions shown to the user
+  /// List of Map to represent the suggestions shown to the user.
   ///
-  /// You need to provide two properties `id` & `display` both are [String]
+  /// You need to provide two properties `id` & `display` both are [String].
   /// You can also have any custom properties as you like to build custom suggestion
   /// widget.
   final List<Map<String, dynamic>> data;
@@ -38,7 +44,7 @@ class Mention {
   /// Style for the mention item in Input.
   final TextStyle? style;
 
-  /// Should every non-suggestion with the trigger character be matched
+  /// Should every non-suggestion with the trigger character be matched.
   final bool matchAll;
 
   /// Should the markup generation be disabled for this Mention Item.
@@ -52,6 +58,7 @@ class Mention {
       markupBuilder;
 }
 
+/// Internal class to store annotation metadata for matched mentions.
 class Annotation {
   Annotation({
     required this.trigger,
@@ -62,11 +69,11 @@ class Annotation {
     this.markupBuilder,
   });
 
-  TextStyle? style;
-  String? id;
-  String? display;
-  String trigger;
-  bool disableMarkup;
+  final TextStyle? style;
+  final String? id;
+  final String? display;
+  final String trigger;
+  final bool disableMarkup;
   final String Function(String trigger, String mention, String value)?
       markupBuilder;
 }

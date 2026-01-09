@@ -6,78 +6,96 @@ class AnnotationEditingController extends TextEditingController {
   Map<String, Annotation> _mapping;
   String? _pattern;
 
-  // Generate the Regex pattern for matching all the suggestions in one.
+  /// Generate the Regex pattern for matching all the suggestions in one.
   AnnotationEditingController(this._mapping)
       : _pattern = _mapping.keys.isNotEmpty
             ? "(${_mapping.keys.map((key) => RegExp.escape(key)).join('|')})"
             : null;
 
+  /// Finds the annotation for a given match string.
+  /// Returns null if no matching annotation is found.
+  Annotation? _findAnnotation(String matchText) {
+    // First try direct lookup
+    final directMatch = _mapping[matchText];
+    if (directMatch != null) return directMatch;
+
+    // Then try regex matching
+    for (final key in _mapping.keys) {
+      final reg = RegExp(key);
+      if (reg.hasMatch(matchText)) {
+        return _mapping[key];
+      }
+    }
+
+    return null;
+  }
+
   /// Can be used to get the markup from the controller directly.
   String get markupText {
-    final someVal = _mapping.isEmpty
-        ? text
-        : text.splitMapJoin(
-            RegExp('$_pattern'),
-            onMatch: (Match match) {
-              final mention = _mapping[match[0]!] ??
-                  _mapping[_mapping.keys.firstWhere((element) {
-                    final reg = RegExp(element);
+    if (_mapping.isEmpty || _pattern == null || _pattern == '()') {
+      return text;
+    }
 
-                    return reg.hasMatch(match[0]!);
-                  })]!;
+    return text.splitMapJoin(
+      RegExp('$_pattern'),
+      onMatch: (Match match) {
+        final matchText = match[0]!;
+        final mention = _findAnnotation(matchText);
 
-              // Default markup format for mentions
-              if (!mention.disableMarkup) {
-                return mention.markupBuilder != null
-                    ? mention.markupBuilder!(
-                        mention.trigger, mention.id!, mention.display!)
-                    : '${mention.trigger}[__${mention.id}__](__${mention.display}__)';
-              } else {
-                return match[0]!;
-              }
-            },
-            onNonMatch: (String text) {
-              return text;
-            },
-          );
+        if (mention == null) return matchText;
 
-    return someVal;
+        // Default markup format for mentions
+        if (!mention.disableMarkup) {
+          return mention.markupBuilder != null
+              ? mention.markupBuilder!(
+                  mention.trigger, mention.id ?? '', mention.display ?? '')
+              : '${mention.trigger}[__${mention.id}__](__${mention.display}__)';
+        } else {
+          return matchText;
+        }
+      },
+      onNonMatch: (String text) => text,
+    );
   }
 
-  Map<String, Annotation> get mapping {
-    return _mapping;
-  }
+  /// Returns the current mapping of patterns to annotations.
+  Map<String, Annotation> get mapping => _mapping;
 
-  set mapping(Map<String, Annotation> _mapping) {
-    this._mapping = _mapping;
-
-    _pattern = "(${_mapping.keys.map((key) => RegExp.escape(key)).join('|')})";
+  /// Updates the mapping and regenerates the pattern.
+  set mapping(Map<String, Annotation> newMapping) {
+    _mapping = newMapping;
+    _pattern = _mapping.keys.isNotEmpty
+        ? "(${_mapping.keys.map((key) => RegExp.escape(key)).join('|')})"
+        : null;
   }
 
   @override
-  TextSpan buildTextSpan({BuildContext? context, TextStyle? style, bool? withComposing}) {
-    var children = <InlineSpan>[];
+  TextSpan buildTextSpan({
+    required BuildContext context,
+    TextStyle? style,
+    required bool withComposing,
+  }) {
+    final children = <InlineSpan>[];
 
-    if (_pattern == null || _pattern == '()') {
+    if (_pattern == null || _pattern == '()' || _mapping.isEmpty) {
       children.add(TextSpan(text: text, style: style));
     } else {
       text.splitMapJoin(
         RegExp('$_pattern'),
         onMatch: (Match match) {
-          if (_mapping.isNotEmpty) {
-            final mention = _mapping[match[0]!] ??
-                _mapping[_mapping.keys.firstWhere((element) {
-                  final reg = RegExp(element);
+          final matchText = match[0]!;
+          final mention = _findAnnotation(matchText);
 
-                  return reg.hasMatch(match[0]!);
-                })]!;
-
+          if (mention != null) {
             children.add(
               TextSpan(
-                text: match[0],
-                style: style!.merge(mention.style),
+                text: matchText,
+                style: style?.merge(mention.style) ?? mention.style,
               ),
             );
+          } else {
+            // Fallback if no mention found - just use regular style
+            children.add(TextSpan(text: matchText, style: style));
           }
 
           return '';
